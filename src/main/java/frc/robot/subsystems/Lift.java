@@ -57,6 +57,9 @@ public class Lift extends SubsystemBase {
         mech_arm = mech_elevator.append(new MechanismLigament2d("arm", 33, arm.getAngle().getDegrees()));
         mech_wrist = mech_arm.append(new MechanismLigament2d("wrist", 10, wrist.getAngle().getDegrees()));
 
+        // Initialize the shuffleboard values and start logging data
+        initializeShuffleboard();
+
         CommandScheduler.getInstance().registerSubsystem(this);
     }
 
@@ -160,8 +163,5 @@ public class Lift extends SubsystemBase {
                     break;
             }
         }
-
-        // Starts logging and updates the shuffleboard
-        updateShuffleboard();
     }
 }
