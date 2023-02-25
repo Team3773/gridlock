@@ -57,9 +57,6 @@ public class Lift extends SubsystemBase {
         mech_arm = mech_elevator.append(new MechanismLigament2d("arm", 33, arm.getAngle().getDegrees()));
         mech_wrist = mech_arm.append(new MechanismLigament2d("wrist", 10, wrist.getAngle().getDegrees()));
 
-        // Initialize the shuffleboard values and start logging data
-        initializeShuffleboard();
-
         CommandScheduler.getInstance().registerSubsystem(this);
     }
 
@@ -72,7 +69,7 @@ public class Lift extends SubsystemBase {
             LightningShuffleboard.setDouble("Lift", "Lift next state arm angle", nextState.getArmAngle().getDegrees());
             LightningShuffleboard.setDouble("Lift", "Lift next state wrist angle", nextState.getWristAngle().getDegrees());
             LightningShuffleboard.setString("Lift", "Lift next state plan", nextState.getPlan().toString());
-            LightningShuffleboard.set("Lift", "Lift next state", nextState);
+            // LightningShuffleboard.set("Lift", "Lift next state", nextState);
         }
 
         mech_elevator.setLength(elevator.getExtension());
@@ -163,5 +160,8 @@ public class Lift extends SubsystemBase {
                     break;
             }
         }
+
+        // Starts logging and updates the shuffleboard
+        updateShuffleboard();
     }
 }
