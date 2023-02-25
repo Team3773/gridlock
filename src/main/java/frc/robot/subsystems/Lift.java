@@ -1,5 +1,8 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.LiftConstants.LiftState;
@@ -24,6 +27,15 @@ public class Lift extends SubsystemBase {
     // The next state to transition to
     public StateTransition nextState;
 
+
+    //mechanism creation for logging and shuffleboard
+    private Mechanism2d armMech = new Mechanism2d(100, 100);
+    private MechanismRoot2d root = armMech.getRoot("lift", 0, 0);
+
+    private MechanismLigament2d m_elevator;
+    private MechanismLigament2d m_arm;
+    private MechanismLigament2d m_wrist;
+    
     /**
      * Creates a new lift subsystem
      * 
@@ -40,6 +52,10 @@ public class Lift extends SubsystemBase {
         elevator.setExtension(elevator.getExtension());
         arm.setAngle(arm.getAngle());
         wrist.setAngle(wrist.getAngle());
+        //---------------------------------------------------------------------- 40 is the length of our elevator
+        m_elevator = root.append(new MechanismLigament2d("elevator", elevator.getExtension() + 40, 55));
+        m_arm = m_elevator.append(new MechanismLigament2d("arm", 33, arm.getAngle().getDegrees()));
+        m_wrist = m_arm.append(new MechanismLigament2d("wrist", 10, wrist.getAngle().getDegrees()));
 
         CommandScheduler.getInstance().registerSubsystem(this);
     }
@@ -55,6 +71,11 @@ public class Lift extends SubsystemBase {
             LightningShuffleboard.setString("Lift", "Lift next state plan", nextState.getPlan().toString());
             LightningShuffleboard.set("Lift", "Lift next state", nextState);
         }
+
+        m_elevator.setLength(elevator.getExtension());
+        m_arm.setAngle(arm.getAngle());
+        m_wrist.setAngle(wrist.getAngle());
+        LightningShuffleboard.set("Lift", "mechanism 2D", armMech);
     }
 
     /**
