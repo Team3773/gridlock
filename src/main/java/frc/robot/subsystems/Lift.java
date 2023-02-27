@@ -52,10 +52,9 @@ public class Lift extends SubsystemBase {
         elevator.setExtension(elevator.getExtension());
         arm.setAngle(arm.getAngle());
         wrist.setAngle(wrist.getAngle());
-        //---------------------------------------------------------------------- 40 is the length of our elevator
-        mech_elevator = root.append(new MechanismLigament2d("elevator", elevator.getExtension() + 40, 55));
-        mech_arm = mech_elevator.append(new MechanismLigament2d("arm", 33, arm.getAngle().getDegrees()));
-        mech_wrist = mech_arm.append(new MechanismLigament2d("wrist", 10, wrist.getAngle().getDegrees()));
+
+        // Initialize the shuffleboard values and start logging data
+        initializeShuffleboard();
 
         CommandScheduler.getInstance().registerSubsystem(this);
     }
