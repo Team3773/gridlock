@@ -1,9 +1,13 @@
 package frc.robot.subsystems;
 
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
+
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -11,7 +15,7 @@ import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.RobotMap.CAN;
 import frc.thunder.config.NeoConfig;
 import frc.thunder.config.SparkMaxPIDGains;
-import frc.thunder.shuffleboard.LightningShuffleboard;
+import frc.thunder.shuffleboard.LightningShuffleboardPeriodic;
 
 /**
  * The elevator subsystem
@@ -25,6 +29,13 @@ public class Elevator extends SubsystemBase {
 
     // The target extension to be set to the elevator
     private double targetExtension;
+
+    private boolean disableEle = false;
+
+    private double tolerance = ElevatorConstants.TOLERANCE;
+
+    // Periodic Shuffleboard 
+    private LightningShuffleboardPeriodic periodicShuffleboard;
 
     public Elevator() {
 
@@ -41,22 +52,28 @@ public class Elevator extends SubsystemBase {
         controller = NeoConfig.createPIDController(motor.getPIDController(), new SparkMaxPIDGains(ElevatorConstants.kP, ElevatorConstants.kI, ElevatorConstants.kD, ElevatorConstants.kF), encoder);
         controller.setOutputRange(ElevatorConstants.MIN_POWER, ElevatorConstants.MAX_POWER);
 
+        // Initialize the shuffleboard values and start logging data
+        targetExtension = getExtension();
+
         initializeShuffleboard();
 
         CommandScheduler.getInstance().registerSubsystem(this);
     }
 
     // Metod to starts logging and updates the shuffleboard
+    @SuppressWarnings("unchecked")
     private void initializeShuffleboard() {
-        LightningShuffleboard.setBoolSupplier("Elevator", "Top limit", () -> getTopLimitSwitch());
-        LightningShuffleboard.setBoolSupplier("Elevator", "Bottom limit", () -> getBottomLimitSwitch());
-        LightningShuffleboard.setDoubleSupplier("Elevator", "Elevator target height", () -> targetExtension);
-        LightningShuffleboard.setDoubleSupplier("Elevator", "Elevator height", () -> getExtension());
-        LightningShuffleboard.setBoolSupplier("Elevator", "Elevator on target", () -> onTarget());
-        LightningShuffleboard.setDoubleSupplier("Elevator", "Elevator motor temperature", () -> motor.getMotorTemperature());
-        LightningShuffleboard.setDoubleSupplier("Elevator", "Elevator motor controller output (volts)", () -> motor.getAppliedOutput());
-        LightningShuffleboard.setDoubleSupplier("Elevator", "Elevator motor controller output (Amps)", () -> motor.getOutputCurrent());
-        LightningShuffleboard.setDoubleSupplier("Elevator", "Elevator motor controller input voltage", () -> motor.getBusVoltage());
+        periodicShuffleboard = new LightningShuffleboardPeriodic("Elevator", ElevatorConstants.LOG_PERIOD,
+                new Pair<String, Object>("Top Limit", (BooleanSupplier) () -> getTopLimitSwitch()),
+                new Pair<String, Object>("Bottom Limit", (BooleanSupplier) () -> getBottomLimitSwitch()), 
+                new Pair<String, Object>("Elevator target height", (DoubleSupplier) () -> targetExtension),
+                new Pair<String, Object>("Elevator height", (DoubleSupplier) () -> getExtension()), 
+                new Pair<String, Object>("Elevator on target", (BooleanSupplier) () -> onTarget()),
+                new Pair<String, Object>("Elecator amps", (DoubleSupplier) () -> motor.getOutputCurrent()));
+        // new Pair<String, Object>("Elevator motor temperature", (DoubleSupplier) () -> motor.getMotorTemperature()),
+        // new Pair<String, Object>("Elevator motor controller output (volts)", (DoubleSupplier) () -> motor.getAppliedOutput()),
+        // new Pair<String, Object>("Elevator motor controller output (Amps)", (DoubleSupplier) () -> motor.getOutputCurrent()),
+        // new Pair<String, Object>("Elevator motor controller voltage", (DoubleSupplier) () -> motor.getBusVoltage()));
 
     }
 
@@ -104,7 +121,8 @@ public class Elevator extends SubsystemBase {
      * @return true if the elevator is within the tolerance of the target extension
      */
     public boolean onTarget() {
-        return Math.abs(targetExtension - encoder.getPosition()) < ElevatorConstants.TOLERANCE;
+        return Math.abs(targetExtension - encoder.getPosition()) < tolerance;
+        // return true;
     }
 
     /**
@@ -115,7 +133,8 @@ public class Elevator extends SubsystemBase {
      * @return true if the elevator is within the tolerance of the target extension
      */
     public boolean onTarget(double target) {
-        return Math.abs(target - encoder.getPosition()) < ElevatorConstants.TOLERANCE;
+        return Math.abs(target - encoder.getPosition()) < tolerance;
+        // return true;
     }
 
     /**
@@ -157,14 +176,31 @@ public class Elevator extends SubsystemBase {
         return targetHeight >= ElevatorConstants.MIN_EXTENSION && targetHeight <= ElevatorConstants.MAX_EXTENSION;
     }
 
+    public void disableEle() {
+        disableEle = true;
+    }
+
+    public void setTolerance(double tolerance) {
+        this.tolerance = tolerance;
+    }
+
     @Override
     public void periodic() {
-        if (getTopLimitSwitch()) {
-            encoder.setPosition(ElevatorConstants.MAX_EXTENSION);
-        }
 
-        if (getBottomLimitSwitch()) {
-            encoder.setPosition(ElevatorConstants.MIN_EXTENSION);
+        periodicShuffleboard.loop();
+        // if (getTopLimitSwitch()) {
+        //     encoder.setPosition(ElevatorConstants.MAX_EXTENSION);
+        // }
+
+        // if (getBottomLimitSwitch()) {
+        //     encoder.setPosition(ElevatorConstants.MIN_EXTENSION);
+        // }
+
+        // setExtension(LightningShuffleboard.getDouble("Lift", "ele targ", 0));
+
+
+        if(disableEle) {
+            motor.set(0);
         }
     }
 }

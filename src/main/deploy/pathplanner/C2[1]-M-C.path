@@ -3,12 +3,12 @@
     {
       "anchorPoint": {
         "x": 1.85,
-        "y": 2.75
+        "y": 1.05
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.849999999999999,
-        "y": 2.75
+        "x": 3.1037351315310024,
+        "y": 1.05
       },
       "holonomicAngle": 0.0,
       "isReversal": false,
@@ -17,25 +17,25 @@
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "Score-Game-Piece-Servo"
+          "Score-Piece-Servo"
         ],
-        "executionBehavior": "sequential",
-        "waitBehavior": "none",
-        "waitTime": 0
+        "executionBehavior": "parallel",
+        "waitBehavior": "after",
+        "waitTime": 2.0
       }
     },
     {
       "anchorPoint": {
-        "x": 5.1100017584650566,
-        "y": 2.75
+        "x": 5.65,
+        "y": 1.05
       },
       "prevControl": {
-        "x": 4.1100017584650566,
-        "y": 2.75
+        "x": 4.510896231448096,
+        "y": 1.05
       },
       "nextControl": {
-        "x": 6.1100017584650566,
-        "y": 2.75
+        "x": 5.671359736688366,
+        "y": 1.05
       },
       "holonomicAngle": 0.0,
       "isReversal": false,
@@ -43,7 +43,9 @@
       "isLocked": false,
       "isStopPoint": false,
       "stopEvent": {
-        "names": [],
+        "names": [
+          "Score-Game-Piece-One"
+        ],
         "executionBehavior": "parallel",
         "waitBehavior": "none",
         "waitTime": 0
@@ -51,21 +53,23 @@
     },
     {
       "anchorPoint": {
-        "x": 7.258589613333074,
-        "y": 2.75
+        "x": 4.8,
+        "y": 2.35
       },
       "prevControl": {
-        "x": 6.551863087874694,
-        "y": 2.75
+        "x": 5.774811453469063,
+        "y": 2.3894609327680203
       },
       "nextControl": null,
-      "holonomicAngle": 0.0,
+      "holonomicAngle": 0,
       "isReversal": false,
       "velOverride": null,
       "isLocked": false,
       "isStopPoint": false,
       "stopEvent": {
-        "names": [],
+        "names": [
+          "Auto-Balance"
+        ],
         "executionBehavior": "parallel",
         "waitBehavior": "none",
         "waitTime": 0

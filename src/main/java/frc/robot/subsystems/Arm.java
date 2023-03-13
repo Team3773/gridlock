@@ -1,10 +1,14 @@
 package frc.robot.subsystems;
 
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
+
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkMaxAbsoluteEncoder;
-import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.SparkMaxAbsoluteEncoder.Type;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.Pair;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -12,8 +16,8 @@ import frc.robot.Constants;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.RobotMap;
 import frc.thunder.config.NeoConfig;
-import frc.thunder.config.SparkMaxPIDGains;
 import frc.thunder.shuffleboard.LightningShuffleboard;
+import frc.thunder.shuffleboard.LightningShuffleboardPeriodic;
 
 /**
  * The arm subsystem
@@ -22,14 +26,24 @@ public class Arm extends SubsystemBase {
 
     // The motor, encoder, and PID controller
     private CANSparkMax motor;
-    private SparkMaxPIDController controller;
+    private PIDController upController = new PIDController(ArmConstants.UP_kP, ArmConstants.UP_kI, ArmConstants.UP_kD);
+    private PIDController downController = new PIDController(ArmConstants.DOWN_kP, ArmConstants.DOWN_kI, ArmConstants.DOWN_kD);
     private SparkMaxAbsoluteEncoder encoder;
 
     // The encoder offset 
     private double OFFSET;
 
+    private double PIDOUT;
+
+    private double tolerance = ArmConstants.TOLERANCE;
+
     // The target angle to be set to the arm
     private double targetAngle;
+
+    private boolean disableArm = false;
+
+    // Periodic Shuffleboard
+    private LightningShuffleboardPeriodic periodicShuffleboard;
 
     public Arm() {
         if (Constants.isBlackout()) {
@@ -44,32 +58,34 @@ public class Arm extends SubsystemBase {
         motor = NeoConfig.createMotor(RobotMap.CAN.ARM_MOTOR, ArmConstants.MOTOR_INVERT, ArmConstants.CURRENT_LIMIT, Constants.VOLTAGE_COMPENSATION, ArmConstants.MOTOR_TYPE,
                 ArmConstants.NEUTRAL_MODE);
         // Sets the ramp rate for the motor
-        motor.setClosedLoopRampRate(2);
+        motor.setClosedLoopRampRate(1);
 
         // Create the absolute encoder and sets the conversion factor
         encoder = motor.getAbsoluteEncoder(Type.kDutyCycle);
         encoder.setPositionConversionFactor(ArmConstants.POSITION_CONVERSION_FACTOR);
 
-        // Create the PID controller and set the output range
-        controller = NeoConfig.createPIDController(motor.getPIDController(), new SparkMaxPIDGains(ArmConstants.kP, ArmConstants.kI, ArmConstants.kD, ArmConstants.kF), encoder);
-        controller.setOutputRange(ArmConstants.MIN_POWER, ArmConstants.MAX_POWER);
+        motor.getReverseLimitSwitch(ArmConstants.BOTTOM_LIMIT_SWITCH_TYPE).enableLimitSwitch(false);
+        motor.getForwardLimitSwitch(ArmConstants.TOP_LIMIT_SWITCH_TYPE).enableLimitSwitch(false);
 
+        // Create the PID controller and set the output range
+        targetAngle = getAngle().getDegrees();
 
         // Starts logging and updates the shuffleboard
-        // initializeShuffleboard();
+        initializeShuffleboard();
 
         CommandScheduler.getInstance().registerSubsystem(this);
     }
 
     // Metod to starts logging and updates the shuffleboard
+    @SuppressWarnings("unchecked")
     private void initializeShuffleboard() {
-        LightningShuffleboard.setBoolSupplier("Arm", "Arm Bottom Limit", () -> getBottomLimitSwitch());
-        LightningShuffleboard.setBoolSupplier("Arm", "Arm Top Limit", () -> getTopLimitSwitch());
-        LightningShuffleboard.setDoubleSupplier("Arm", "Arm angle", () -> getAngle().getDegrees());
-        LightningShuffleboard.setDoubleSupplier("Arm", "Arm Target Angle", () ->  targetAngle + OFFSET);
-        LightningShuffleboard.setDoubleSupplier("Arm", "Arm motor controller input voltage", () -> motor.getBusVoltage());
-        LightningShuffleboard.setDoubleSupplier("Arm", "Arm motor controller output (Amps)", () ->  motor.getOutputCurrent());
-        LightningShuffleboard.setDoubleSupplier("Arm", "Arm motor controller output (volts)", () -> motor.getAppliedOutput());
+        periodicShuffleboard = new LightningShuffleboardPeriodic("Arm", ArmConstants.LOG_PERIOD, new Pair<String, Object>("Arm angle", (DoubleSupplier) () -> getAngle().getDegrees()),
+                new Pair<String, Object>("Arm Target Angle", (DoubleSupplier) () -> targetAngle), new Pair<String, Object>("Arm on target", (BooleanSupplier) () -> onTarget()),
+                new Pair<String, Object>("Arm amps", (DoubleSupplier) () -> motor.getOutputCurrent()));
+        // new Pair<String, Object>("Arm Bottom Limit", (BooleanSupplier) () -> getBottomLimitSwitch()),
+        // new Pair<String, Object>("Arm Top Limit", (BooleanSupplier) () -> getTopLimitSwitch()), 
+        // new Pair<String, Object>("Arm motor controller input voltage", (DoubleSupplier) () -> motor.getBusVoltage()),
+        // new Pair<String, Object>("Arm motor controller output (volts)", (DoubleSupplier) () -> motor.getAppliedOutput()));
     }
 
     /**
@@ -80,9 +96,10 @@ public class Arm extends SubsystemBase {
      */
     public void setAngle(Rotation2d angle) {
         targetAngle = MathUtil.clamp(angle.getDegrees(), ArmConstants.MIN_ANGLE, ArmConstants.MAX_ANGLE);
+    }
 
-        controller.setReference(targetAngle + OFFSET, CANSparkMax.ControlType.kPosition, 0);
-
+    public double getTargetAngle() {
+        return targetAngle;
     }
 
     /**
@@ -91,7 +108,8 @@ public class Arm extends SubsystemBase {
      * @return the angle of the arm as a Rotation2d object
      */
     public Rotation2d getAngle() {
-        return Rotation2d.fromDegrees(encoder.getPosition() - OFFSET);
+        return Rotation2d.fromDegrees(MathUtil.inputModulus(encoder.getPosition() - OFFSET, -180, 180));
+        // return Rotation2d.fromDegrees(encoder.getPosition() - OFFSET);
     }
 
     /**
@@ -134,7 +152,8 @@ public class Arm extends SubsystemBase {
      * @return true if the arm is within the tolerance of the target angle
      */
     public boolean onTarget() {
-        return Math.abs(getAngle().getDegrees() - targetAngle) < ArmConstants.TOLERANCE;
+        return Math.abs(getAngle().getDegrees() - targetAngle) < tolerance;
+        // return true;
     }
 
     /**
@@ -145,7 +164,12 @@ public class Arm extends SubsystemBase {
      * @return true if the arm is within the tolerance of the target angle
      */
     public boolean onTarget(double target) {
-        return Math.abs(getAngle().getDegrees() - target) < ArmConstants.TOLERANCE;
+        return Math.abs(getAngle().getDegrees() - target) < tolerance;
+        // return true;
+    }
+
+    public void setTolerance(double tolerance) {
+        this.tolerance = tolerance;
     }
 
     /**
@@ -157,9 +181,37 @@ public class Arm extends SubsystemBase {
         return angle.getDegrees() >= ArmConstants.MIN_ANGLE && angle.getDegrees() <= ArmConstants.MAX_ANGLE;
     }
 
+    public void disableArm() {
+        disableArm = true;
+    }
+
     @Override
     public void periodic() {
-        // Sets the feedforward gains based on the current angle of the arm
-        controller.setFF(ArmConstants.ARM_UP_KF_MAP.get(getAngle().getDegrees()), 0);
+        double currentAngle = getAngle().getDegrees();
+        // double kFOut = LightningShuffleboard.getDouble("Arm", "kF in", 0);
+        double kFOut = ArmConstants.ARM_KF_MAP.get(currentAngle);
+        if(targetAngle-currentAngle > 0) {
+            PIDOUT = upController.calculate(currentAngle, targetAngle);
+        } else {
+            PIDOUT = downController.calculate(currentAngle, targetAngle);
+        }
+        double power = kFOut + PIDOUT;
+
+        if (disableArm) {
+            motor.set(0);
+        } else {
+            motor.set(power);
+        }
+
+        periodicShuffleboard.loop();
+
+        // upController.setD(LightningShuffleboard.getDouble("Arm", "up kD", ArmConstants.UP_kD));
+        // upController.setP(LightningShuffleboard.getDouble("Arm", "up kP", ArmConstants.UP_kP));
+
+        // downController.setD(LightningShuffleboard.getDouble("Arm", "down kD", ArmConstants.DOWN_kD));
+        // downController.setP(LightningShuffleboard.getDouble("Arm", "down kP", ArmConstants.DOWN_kP));
+
+        // setAngle(Rotation2d.fromDegrees(LightningShuffleboard.getDouble("Arm", "arm setpoint", -60)));
+        // LightningShuffleboard.setDouble("Arm", "kf map", ArmConstants.ARM_KF_MAP.get(currentAngle));
     }
 }

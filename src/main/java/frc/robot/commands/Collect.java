@@ -2,6 +2,7 @@ package frc.robot.commands;
 
 import java.util.function.DoubleSupplier;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.Constants.CollectorConstants;
 import frc.robot.subsystems.Collector;
 
 /**
@@ -26,7 +27,7 @@ public class Collect extends CommandBase {
 
     @Override
     public void execute() {
-        collector.runCollector(input.getAsDouble());
+            collector.runCollector(input.getAsDouble());
     }
 
     @Override

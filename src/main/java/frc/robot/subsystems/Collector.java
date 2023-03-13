@@ -1,11 +1,17 @@
 package frc.robot.subsystems;
 
+import java.time.Period;
+import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.ColorMatch;
 import com.revrobotics.ColorMatchResult;
 import com.revrobotics.ColorSensorV3;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -14,6 +20,7 @@ import frc.robot.Constants.CollectorConstants;
 import frc.robot.Constants.RobotMap.*;
 import frc.thunder.config.NeoConfig;
 import frc.thunder.shuffleboard.LightningShuffleboard;
+import frc.thunder.shuffleboard.LightningShuffleboardPeriodic;
 
 /**
  * The collector subsystem
@@ -28,15 +35,20 @@ public class Collector extends SubsystemBase {
     // The rev color matcher
     private final ColorMatch colorMatch;
 
+    // Periodic Shuffleboard
+    private LightningShuffleboardPeriodic periodicShuffleboard;
+
     // Enum of possible game pieces
     public enum GamePiece {
         CONE, CUBE, NONE
     }
 
+    private GamePiece gamePiece = GamePiece.CUBE;
+
     public Collector() {
         // Create the motor and configure it
-        motor = NeoConfig.createMotor(CAN.LEFT_COLLECTOR_MOTOR, CollectorConstants.MOTOR_INVERT, CollectorConstants.CURRENT_LIMIT, Constants.VOLTAGE_COMPENSATION, MotorType.kBrushless,
-                IdleMode.kCoast);
+        motor = NeoConfig.createMotor(CAN.COLLECTOR_MOTOR, CollectorConstants.MOTOR_INVERT, CollectorConstants.CURRENT_LIMIT, Constants.VOLTAGE_COMPENSATION, CollectorConstants.MOTOR_TYPE,
+                CollectorConstants.NEUTRAL_MODE);
 
         // Create the color sensor
         colorSensor = new ColorSensorV3(i2c.COLOR_SENSOR);
@@ -59,14 +71,16 @@ public class Collector extends SubsystemBase {
     }
 
     // Method to start logging
+    @SuppressWarnings("unchecked")
     private void initialiizeShuffleboard() {
-        LightningShuffleboard.setDoubleSupplier("Collector", "Collector motor temperature", () -> motor.getMotorTemperature());
-        LightningShuffleboard.setDoubleSupplier("Collector", "Collector motor controller input voltage", () -> motor.getBusVoltage());
-        LightningShuffleboard.setDoubleSupplier("Collector", "Collector motor controller output (amps)", () -> motor.getOutputCurrent());
-        LightningShuffleboard.setDoubleSupplier("Collector", "Collector motor controller output (volts)", () -> motor.getAppliedOutput());
-        LightningShuffleboard.setStringSupplier("Collector", "Color sensor raw color", () ->  colorSensor.getColor().toString());
-        LightningShuffleboard.setStringSupplier("Collector", "Color sensor detected game piece", () -> getGamePiece().toString());
-        LightningShuffleboard.setDoubleSupplier("Collector", "Color sensor confidence", () -> getConfidence());
+        periodicShuffleboard = new LightningShuffleboardPeriodic("Collector", CollectorConstants.LOG_PERIOD,
+                // new Pair<String, Object>("Collector motor temperature", (DoubleSupplier) () -> motor.getMotorTemperature()),
+                // new Pair<String, Object>("Collector motor controller input voltage", (DoubleSupplier) () -> motor.getBusVoltage()),
+                new Pair<String, Object>("Collector motor controller output (amps)", (DoubleSupplier) () -> motor.getOutputCurrent()));
+        // new Pair<String, Object>("Collector motor controller output (volts)", (DoubleSupplier) () -> motor.getAppliedOutput()),
+        // new Pair<String, Object>("Color sensor raw color", (Supplier<String>) () -> colorSensor.getColor().toString()),
+        // new Pair<String, Object>("Color sensor detected game piece", (Supplier<String>) () -> getGamePiece().toString()));
+        // new Pair<String, Object>("Color sensor confidence", (DoubleSupplier) () -> getConfidence()));
 
     }
 
@@ -77,16 +91,21 @@ public class Collector extends SubsystemBase {
      */
 
     public GamePiece getGamePiece() {
-        Color detectedColor = colorSensor.getColor();
-        ColorMatchResult match = colorMatch.matchClosestColor(detectedColor);
+        // Color detectedColor = colorSensor.getColor();
+        // ColorMatchResult match = colorMatch.matchClosestColor(detectedColor);
 
-        if (match.color == CollectorConstants.CUBE_OPTIMAL) {
-            return GamePiece.CUBE;
-        } else if (match.color == CollectorConstants.CONE_OPTIMAL) {
-            return GamePiece.CONE;
-        } else {
-            return GamePiece.NONE;
-        }
+        // if (match.color == CollectorConstants.CUBE_OPTIMAL) {
+        //     return GamePiece.CUBE;
+        // } else if (match.color == CollectorConstants.CONE_OPTIMAL) {
+        //     return GamePiece.CONE;
+        // } else {
+        //     return GamePiece.NONE;
+        // }
+        return gamePiece;
+    }
+
+    public void setGamePiece(GamePiece gamePiece) {
+        this.gamePiece = gamePiece;
     }
 
     /**
@@ -107,7 +126,7 @@ public class Collector extends SubsystemBase {
      * @return true if the color sensor detects a game piece
      */
     public boolean hasPiece() {
-        return getGamePiece() != GamePiece.NONE;
+        return true;// getGamePiece() != GamePiece.NONE;
     }
 
     /**
@@ -116,7 +135,12 @@ public class Collector extends SubsystemBase {
      * @param power the percent speed to set the elevator motor to
      */
     public void setPower(double power) {
-        motor.set(power);
+        if(getGamePiece() == GamePiece.CONE) {
+            motor.set(MathUtil.clamp(power, -1, 0.5));
+        } else {
+            motor.set(power);
+        }
+            
     }
 
     /**
@@ -124,5 +148,19 @@ public class Collector extends SubsystemBase {
      */
     public void stop() {
         setPower(0d);
+    }
+
+    @Override
+    public void periodic() {
+        LightningShuffleboard.setDouble("Collector", "color sensor blue", colorSensor.getColor().blue);
+        LightningShuffleboard.setDouble("Collector", "color sensor green", colorSensor.getColor().green);
+        LightningShuffleboard.setDouble("Collector", "color sensor red", colorSensor.getColor().red);
+
+        Color detectedColor = colorSensor.getColor();
+        ColorMatchResult match = colorMatch.matchClosestColor(detectedColor);
+        LightningShuffleboard.setBool("Collector", "is cube", match.color == CollectorConstants.CUBE_OPTIMAL);
+        LightningShuffleboard.setBool("Collector", "is cone", match.color == CollectorConstants.CONE_OPTIMAL);
+
+        periodicShuffleboard.loop();
     }
 }
