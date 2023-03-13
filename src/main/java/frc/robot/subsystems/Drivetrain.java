@@ -376,8 +376,8 @@ public class Drivetrain extends SubsystemBase {
 
         // LightningShuffleboard.setDoubleArray("Drivetrain", "ES Pose", () -> new double[]{pose.getX(), pose.getY(), pose.getRotation().getRadians()});
 
-        LightningShuffleboard.setDoubleArray("Drivetrain", "Odometry Pose", () -> new double[]{pose.getX(), pose.getY(), pose.getRotation().getRadians()});
-        LightningShuffleboard.setDoubleArray("Drivetrain", "ES Pose", () -> new double[]{ESpose.getX(), ESpose.getY(), ESpose.getRotation().getRadians()});
+        // LightningShuffleboard.setDoubleArray("Drivetrain", "Odometry Pose", () -> new double[]{pose.getX(), pose.getY(), pose.getRotation().getRadians()});
+        // LightningShuffleboard.setDoubleArray("Drivetrain", "ES Pose", () -> new double[]{.getX(), ESpose.getY(), ESpose.getRotation().getRadians()});
 
     }
 
