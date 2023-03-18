@@ -69,8 +69,19 @@ public final class Constants {
     public static final class DrivetrainConstants {
         // Our drivetrain and track width
         // TODO: remeasure these
-        public static final double DRIVETRAIN_TRACKWIDTH_METERS = Units.inchesToMeters(20.8125d);
-        public static final double DRIVETRAIN_WHEELBASE_METERS = Units.inchesToMeters(20.8125d);
+
+        // public static final double kTrackWidth = Units.inchesToMeters(28);
+        // // Distance between right and left wheels
+        // public static final double kWheelBase = Units.inchesToMeters(32);
+        // // Distance between front and back wheels
+        // public static final SwerveDriveKinematics kDriveKinematics = new SwerveDriveKinematics(
+        //     new Translation2d(kWheelBase / 2, kTrackWidth / 2),
+        //     new Translation2d(kWheelBase / 2, -kTrackWidth / 2),
+        //     new Translation2d(-kWheelBase / 2, kTrackWidth / 2),
+        //     new Translation2d(-kWheelBase / 2, -kTrackWidth / 2));
+
+        public static final double DRIVETRAIN_TRACKWIDTH_METERS = Units.inchesToMeters(28);
+        public static final double DRIVETRAIN_WHEELBASE_METERS = Units.inchesToMeters(32);
 
         // Module resting/default angles
         public static final double FRONT_LEFT_RESTING_ANGLE = Math.toRadians(-45d);
@@ -129,18 +140,18 @@ public final class Constants {
         public static final class Offsets {
             // Gridlocks steer offsets
             public static final class Gridlock {
-                public static final double FRONT_LEFT_STEER_OFFSET = -Math.toRadians(193.535);
-                public static final double FRONT_RIGHT_STEER_OFFSET = -Math.toRadians(145.547);
-                public static final double BACK_LEFT_STEER_OFFSET = -Math.toRadians(198.721);
-                public static final double BACK_RIGHT_STEER_OFFSET = -Math.toRadians(210.938);
+                public static final double FRONT_LEFT_STEER_OFFSET = -Math.toRadians(117.773); // 9
+                public static final double FRONT_RIGHT_STEER_OFFSET = -Math.toRadians(87.803); // 10
+                public static final double BACK_LEFT_STEER_OFFSET = -Math.toRadians(48.955); // 11
+                public static final double BACK_RIGHT_STEER_OFFSET = -Math.toRadians(111.182); // 12
             }
 
             // Blackouts steer offsets
             public static final class Blackout {
-                public static final double FRONT_LEFT_STEER_OFFSET = -Math.toRadians(253.916);
-                public static final double FRONT_RIGHT_STEER_OFFSET = -Math.toRadians(222.451);
-                public static final double BACK_LEFT_STEER_OFFSET = -Math.toRadians(19.688);
-                public static final double BACK_RIGHT_STEER_OFFSET = -Math.toRadians(63.018);
+                public static final double FRONT_LEFT_STEER_OFFSET = -Math.toRadians(117.7736);
+                public static final double FRONT_RIGHT_STEER_OFFSET = -Math.toRadians(87.80);
+                public static final double BACK_LEFT_STEER_OFFSET = -Math.toRadians(48.955);
+                public static final double BACK_RIGHT_STEER_OFFSET = -Math.toRadians(111.182);
             }
         }
     }
@@ -354,21 +365,31 @@ public final class Constants {
             public static final int PDH = 21;
 
             // Front left CanIDs
-            public static final int FRONT_LEFT_DRIVE_MOTOR = 1;
-            public static final int FRONT_LEFT_AZIMUTH_MOTOR = 2;
-            public static final int FRONT_LEFT_CANCODER = 31;
+            public static final int FRONT_LEFT_DRIVE_MOTOR = 2;
+            public static final int FRONT_LEFT_AZIMUTH_MOTOR = 1;
+            public static final int FRONT_LEFT_CANCODER = 9;
             // Front right CanIDs
             public static final int FRONT_RIGHT_DRIVE_MOTOR = 3;
             public static final int FRONT_RIGHT_AZIMUTH_MOTOR = 4;
-            public static final int FRONT_RIGHT_CANCODER = 32;
+            public static final int FRONT_RIGHT_CANCODER = 10;
             // Back right CanIDs
             public static final int BACK_RIGHT_DRIVE_MOTOR = 5;
             public static final int BACK_RIGHT_AZIMUTH_MOTOR = 6;
-            public static final int BACK_RIGHT_CANCODER = 33;
+            public static final int BACK_RIGHT_CANCODER = 12;
             // Back left CanIDs
-            public static final int BACK_LEFT_DRIVE_MOTOR = 7;
-            public static final int BACK_LEFT_AZIMUTH_MOTOR = 8;
-            public static final int BACK_LEFT_CANCODER = 34;
+            public static final int BACK_LEFT_DRIVE_MOTOR = 8;
+            public static final int BACK_LEFT_AZIMUTH_MOTOR = 7;
+            public static final int BACK_LEFT_CANCODER = 11;
+
+            // public static final int kFrontLeftDriveMotorPort = 2;
+            // public static final int kFrontRightDriveMotorPort = 3;
+            // public static final int kBackRightDriveMotorPort = 5;
+            // public static final int kBackLeftDriveMotorPort = 8;
+    
+            // public static final int kFrontLeftTurningMotorPort = 1;
+            // public static final int kFrontRightTurningMotorPort = 4;
+            // public static final int kBackRightTurningMotorPort = 6;
+            // public static final int kBackLeftTurningMotorPort = 7;
 
             // COLLECTOR
             public static final int COLLECTOR_MOTOR = 12;

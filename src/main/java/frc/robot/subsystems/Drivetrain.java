@@ -4,6 +4,9 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix.sensors.WPI_Pigeon2;
+import com.kauailabs.navx.frc.AHRS;
+import edu.wpi.first.wpilibj.SPI;
+
 import frc.thunder.swervelib.Mk4ModuleConfiguration;
 import frc.thunder.swervelib.Mk4iSwerveModuleHelper;
 import frc.thunder.swervelib.SwerveModule;
@@ -45,6 +48,13 @@ import frc.thunder.shuffleboard.LightningShuffleboardPeriodic;
 public class Drivetrain extends SubsystemBase {
 
     // Creates our swerve kinematics using the robots track width and wheel base
+
+    // public static final SwerveDriveKinematics kDriveKinematics = new SwerveDriveKinematics(
+    //     new Translation2d(kWheelBase / 2, kTrackWidth / 2),
+    //     new Translation2d(kWheelBase / 2, -kTrackWidth / 2),
+    //     new Translation2d(-kWheelBase / 2, kTrackWidth / 2),
+    //     new Translation2d(-kWheelBase / 2, -kTrackWidth / 2));
+
     private final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(
             // Front left
             new Translation2d(DrivetrainConstants.DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DrivetrainConstants.DRIVETRAIN_WHEELBASE_METERS / 2.0),
@@ -56,7 +66,8 @@ public class Drivetrain extends SubsystemBase {
             new Translation2d(-DrivetrainConstants.DRIVETRAIN_TRACKWIDTH_METERS / 2.0, -DrivetrainConstants.DRIVETRAIN_WHEELBASE_METERS / 2.0));
 
     // Creating new pigeon2 IMU
-    private final WPI_Pigeon2 pigeon = new WPI_Pigeon2(RobotMap.CAN.PIGEON_ID);
+    // private final WPI_Pigeon2 pigeon = new WPI_Pigeon2(RobotMap.CAN.PIGEON_ID);
+    private final AHRS pigeon = new AHRS(SPI.Port.kMXP);
 
     // Creating our list of module states and module positions
     private SwerveModuleState[] states = {new SwerveModuleState(), new SwerveModuleState(), new SwerveModuleState(), new SwerveModuleState()};
@@ -303,6 +314,7 @@ public class Drivetrain extends SubsystemBase {
 
     /**
      * Updates the module positions array to the current positions of each module
+     * Relative encoder for Neo
      */
     public void updateModulePositions() {
         modulePositions[0] = frontLeftModule.getPosition();
@@ -467,11 +479,13 @@ public class Drivetrain extends SubsystemBase {
      * Zeroes the yaw of the pigeon.
      */
     public void zeroHeading() {
-        pigeon.setYaw(0);
+        pigeon.reset();
+        // pigeon.setYaw(0);
     }
-    public void setHeading(double input) {
-        pigeon.setYaw(input);
-    }
+    // public void setHeading(double input) {
+    //     pigeon.setYaw(input);
+    //     // pigeon.setAngleAdjustment(input);
+    // }
 
     /**
      * Gets the current pose of the robot.
