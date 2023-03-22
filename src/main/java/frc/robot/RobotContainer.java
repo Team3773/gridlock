@@ -17,7 +17,6 @@ import frc.robot.subsystems.ServoTurn;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.XboxControllerConstants;
 import frc.robot.commands.AutoAlign;
-import frc.robot.Constants.LiftConstants.LiftState;
 import frc.robot.commands.SwerveDrive;
 import frc.robot.commands.tests.DriveTrainSystemTest;
 import frc.robot.subsystems.Drivetrain;

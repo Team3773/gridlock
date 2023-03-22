@@ -78,6 +78,8 @@ public class SwerveDrive extends CommandBase {
         drivetrain.drive(
                 // Supply chassie speeds from the translation suppliers using feild relative control
                 // TODO: x and y fliped
+
+                // Takes xOut and yOut and supplies them as a percentage of the max velocity
                 ChassisSpeeds.fromFieldRelativeSpeeds(drivetrain.percentOutputToMetersPerSecond(-xOut), drivetrain.percentOutputToMetersPerSecond(yOut),
                         drivetrain.percentOutputToRadiansPerSecond(zOut), drivetrain.getYaw2d()));
 
