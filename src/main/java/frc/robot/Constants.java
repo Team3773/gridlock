@@ -93,12 +93,12 @@ public final class Constants {
         public static final double MAX_VOLTAGE = 12;
         // public static final double MAX_VELOCITY_METERS_PER_SECOND = 5676.0 / 60.0 * SdsModuleConfigurations.MK4I_L2.getDriveReduction() * SdsModuleConfigurations.MK4I_L2.getWheelDiameter() * Math.PI;
         public static final double MAX_VELOCITY_METERS_PER_SECOND = 5; //12
-        public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = MAX_VELOCITY_METERS_PER_SECOND / Math.hypot(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0);
-        public static final double MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND = MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND * 2 * Math.PI / 5;
+        public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = 4* Math.PI;//MAX_VELOCITY_METERS_PER_SECOND / Math.hypot(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0);
+        public static final double MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND = 3;//MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND * 2 * Math.PI / 5;
 
         // Module configuration constants
-        public static final int DRIVE_CURRENT_LIMIT = 40;
-        public static final int STEER_CURRENT_LIMIT = 30;
+        public static final int DRIVE_CURRENT_LIMIT = 20; //40;
+        public static final int STEER_CURRENT_LIMIT = 20; //30;
         public static final double NOMINAL_VOLTAGE = 12d;
 
         public static final double LOG_PERIOD = 0.18;
@@ -114,16 +114,16 @@ public final class Constants {
 
         // Gains vaules for PIDControllers
         public static final class Gains {
-            public static final double kP = 0.15;// .116d;
+            public static final double kP = 0.05;//0.05;//0.15;// .116d; (ENABLES DRIVE)
             public static final double kI = 0d;
             public static final double kD = 0d;
 
-            public static final double kF = 0.225;// 229d;
+            public static final double kF = 0.225;//0.225;// 229d;
         }
 
         // Gains vaules for theta PIDControllers
         public static final class ThetaGains {
-            public static final double kP = 0d;
+            public static final double kP = 0;
             public static final double kI = 0d;
             public static final double kD = 0d;
 
@@ -140,10 +140,10 @@ public final class Constants {
         public static final class Offsets {
             // Gridlocks steer offsets
             public static final class Gridlock {
-                public static final double FRONT_LEFT_STEER_OFFSET = -Math.toRadians(191.865); // 9 1
-                public static final double FRONT_RIGHT_STEER_OFFSET = -Math.toRadians(149.502); // 10 done
-                public static final double BACK_LEFT_STEER_OFFSET = -Math.toRadians(199.775); // 11
-                public static final double BACK_RIGHT_STEER_OFFSET = -Math.toRadians(208.037); // 12 
+                public static final double FRONT_LEFT_STEER_OFFSET = -Math.toRadians(221.221); // 9 89.033 BECOME 10
+                public static final double FRONT_RIGHT_STEER_OFFSET = -Math.toRadians(120.322); // 10 117.861 BECOME 9
+                public static final double BACK_LEFT_STEER_OFFSET = -Math.toRadians(142.207); // 11 111.445 BECOME 12
+                public static final double BACK_RIGHT_STEER_OFFSET = -Math.toRadians(248.467); // 12 61.172 BECOME
             }
 
             // Blackouts steer offsets
@@ -230,7 +230,7 @@ public final class Constants {
         public static final double TARGET_X = 3.93;
 
         // Gains for our auto balance
-        public static final double kP = 2;
+        public static final double kP = 2;//2;
         public static final double kI = 0;
         public static final double kD = 0;
     }
