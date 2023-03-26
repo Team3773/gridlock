@@ -34,7 +34,7 @@ public class LimelightFront extends SubsystemBase {
         setCameraPose(cameraPose);
 
         // Registers this as a proper Subsystem
-        CommandScheduler.getInstance().registerSubsystem(this);
+        // CommandScheduler.getInstance().registerSubsystem(this);
     }
 
     // Method to initialize shuffleboard with vision data\

@@ -82,7 +82,7 @@ public class AutoBalance extends CommandBase {
     @Override
     public void initialize() {
         // Initialize our climb state to climb
-        // climbState = climbStates.CLIMB;
+        climbState = climbStates.CLIMB;
         // TODO: get rid of this line after testing and proper calibration of odometry
         // drivetrain.resetOdometry(new Pose2d(new Translation2d(2.75, drivetrain.getPose().getY()), drivetrain.getPose().getRotation()));
     }

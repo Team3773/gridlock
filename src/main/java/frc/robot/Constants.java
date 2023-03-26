@@ -57,6 +57,58 @@ public final class Constants {
 
     }
 
+    public final static class OperationConstants {
+        public static final int armExtendMotorChannel = 9;
+        public static final int armRotateMotorChannel = 10;
+        public static final int elevatorMotorChannel = 11;
+        public static final int clawMotorChannel = 12;
+  
+        public static final double kArmRotateGearRatio = 1/977;
+        public static final double kArmExtendGearRatio = 1/343; // EDUCATED GUESS
+        public static final double kElevatorGearRatio = 1/36;
+        public static final double kClawGearRatio = 1/196;
+  
+        public static final double kArmRotateEncoderRot2Meter = 1.0 / 4096.0 * 2 * Math.PI * kArmRotateGearRatio;
+        public static final double kArmExtendEncoderRot2Meter = 2 * Math.PI * kArmExtendGearRatio;
+        public static final double kElevatorEncoderRot2Meter = 2 * Math.PI * kElevatorGearRatio;
+        public static final double kClawEncoderRot2Meter = 2 * Math.PI * kClawGearRatio;
+  
+        // CHANGE TO ACTUAL SETPOINTS
+        public static final double kArmRotateSetpoint = 0;
+        public static final double kArmExtendSetpoint = 0;
+        public static final double kElevatorSetpoint = 0;
+        public static final double kClawSetpoint = 0;
+  
+        // DAMPNERS
+        public static final double kArmRotateDampner = .5;
+        public static final double kArmExtendDampner = .5;
+        public static final double kSwerveDeadband = 0.1;
+        public static final double setpointDeadband = 5;
+  
+        // CHARGE STATION
+        public static final double kBeam_Balance_Goal_Degrees = 0.0;
+  
+        // CHANGE VALUES BASED ON ENCODER READINGS
+        public static final double kElevatorBottomPosition = -129.45;
+        public static final double kElevatorTopPosition = 0;
+  
+        public static final double kClawStopGrabPoint = 0;
+        
+        public static final double kTopArmRotatePoint = 0;
+        public static final double kBottomArmRotatePoint = 0;
+  
+        public static final double kTopArmExtendPoint = 0;
+        public static final double kBottomArmExtendPoint = 0;
+  
+        // EXTERNAL ENCODER PORTS
+        public static final int karmExtendEncoderA = 0;
+        public static final int karmExtendEncoderB = 1;
+        public static final int karmRotateEncoderA = 2;
+        public static final int karmRotateEncoderB = 3;
+  
+        public static final int limitSwitchPort = 4;
+      }
+      
     // Constants for our system tests    
     public static final class SystemTestConstants {
         // Drive Test Variables
@@ -141,9 +193,9 @@ public final class Constants {
             // Gridlocks steer offsets
             public static final class Gridlock {
                 public static final double FRONT_LEFT_STEER_OFFSET = -Math.toRadians(221.221); // 9 89.033 BECOME 10
-                public static final double FRONT_RIGHT_STEER_OFFSET = -Math.toRadians(120.322); // 10 117.861 BECOME 9
-                public static final double BACK_LEFT_STEER_OFFSET = -Math.toRadians(142.207); // 11 111.445 BECOME 12
-                public static final double BACK_RIGHT_STEER_OFFSET = -Math.toRadians(248.467); // 12 61.172 BECOME
+                public static final double FRONT_RIGHT_STEER_OFFSET = -Math.toRadians(142.207 + 4); // 10 117.861 BECOME 9 120.322
+                public static final double BACK_LEFT_STEER_OFFSET = -Math.toRadians(120.322 + 34); // 11 111.445 BECOME 12 142.207
+                public static final double BACK_RIGHT_STEER_OFFSET = -Math.toRadians(248.467 - 14); // 12 61.172 BECOME
             }
 
             // Blackouts steer offsets

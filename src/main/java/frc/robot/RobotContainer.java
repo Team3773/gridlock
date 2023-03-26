@@ -12,14 +12,26 @@ import frc.robot.subsystems.LimelightFront;
 
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import frc.robot.subsystems.ServoTurn;
 // import frc.robot.subsystems.ShuffleBoard;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.XboxControllerConstants;
+import frc.robot.commands.ArmExtendCommand;
+import frc.robot.commands.ArmExtendPIDCommand;
+import frc.robot.commands.ArmRotateCommand;
 import frc.robot.commands.AutoAlign;
+import frc.robot.commands.AutoBalance;
+import frc.robot.commands.ClawCommand;
+import frc.robot.commands.ElevatorCommand;
+import frc.robot.commands.ElevatorPIDCommand;
 import frc.robot.commands.SwerveDrive;
 import frc.robot.commands.tests.DriveTrainSystemTest;
+import frc.robot.subsystems.ArmExtendSubsystem;
+import frc.robot.subsystems.ArmRotateSubsystem;
+import frc.robot.subsystems.ClawSubsystem;
 import frc.robot.subsystems.Drivetrain;
+import frc.robot.subsystems.ElevatorSubsystem;
 import frc.thunder.LightningContainer;
 import frc.robot.Constants.AutonomousConstants;
 import frc.robot.Constants.LimelightConstants;
@@ -29,37 +41,63 @@ import frc.thunder.filter.JoystickFilter.Mode;
 import frc.thunder.pathplanner.com.pathplanner.lib.PathConstraints;
 import frc.thunder.testing.SystemTest;
 
+
 public class RobotContainer extends LightningContainer {
 
     private static final LimelightFront frontLimelight = new LimelightFront(LimelightConstants.FRONT_NAME, LimelightConstants.FRONT_POSE);
     private static final LimelightBack backLimelight = new LimelightBack(LimelightConstants.BACK_NAME, LimelightConstants.BACK_POSE);
-
+    private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
+    private final ClawSubsystem clawSubsystem = new ClawSubsystem();
+    private final ArmExtendSubsystem armExtendSubsystem = new ArmExtendSubsystem();
+    private final ArmRotateSubsystem armRotateSubsystem = new ArmRotateSubsystem();
+    
     // Creating our main subsystems
     private static final Drivetrain drivetrain = new Drivetrain();
     // private static final ShuffleBoard shuffleboard = new ShuffleBoard(drivetrain, elevator, arm, wrist, collector);
 
     // Creates our controllers and deadzones
     private static final XboxController driver = new XboxController(XboxControllerConstants.DRIVER_CONTROLLER_PORT);
-    private static final XboxController copilot = new XboxController(XboxControllerConstants.COPILOT_CONTROLLER_PORT);
+    private static final XboxController operatorJoystick = new XboxController(XboxControllerConstants.COPILOT_CONTROLLER_PORT);
     private static final JoystickFilter joystickFilter = new JoystickFilter(XboxControllerConstants.DEADBAND, XboxControllerConstants.MIN_POWER, XboxControllerConstants.MAX_POWER, Mode.CUBED);
 
     // creates Autonomous Command
     private static final AutonomousCommandFactory autoFactory = new AutonomousCommandFactory(drivetrain::getPose, drivetrain::resetOdometry, drivetrain.getDriveKinematics(),
             AutonomousConstants.DRIVE_PID_CONSTANTS, AutonomousConstants.THETA_PID_CONSTANTS, AutonomousConstants.POSE_PID_CONSTANTS, drivetrain::setStates, drivetrain::resetNeoAngle, drivetrain);
+    
+    public RobotContainer()
+    {
+        // clawSubsystem.set
+        clawSubsystem.setDefaultCommand(new ClawCommand(clawSubsystem, () -> operatorJoystick.getRightTriggerAxis() * 0.1, () -> operatorJoystick.getLeftTriggerAxis() * 0.1));
+        // new Trigger(operatorJoystick::getAButton).whileTrue(new InstantCommand(() -> clawSubsystem.setClawSpeed(.15)));
 
+        // Extend or retract arm with right y-axis.
+        armExtendSubsystem.setDefaultCommand(new ArmExtendCommand(armExtendSubsystem, () -> operatorJoystick.getLeftY()));
+        
+        // Rotate arm with left y-axis.
+        armRotateSubsystem.setDefaultCommand(new ArmRotateCommand(armRotateSubsystem, () -> operatorJoystick.getRightY()));
+        // new Trigger(operatorJoystick::getAButton).whileTrue(new ElevatorCommand(elevatorSubsystem, -.15));
+        new Trigger(operatorJoystick::getYButton).whileTrue(new StartEndCommand(() -> elevatorSubsystem.setElevatorSpeed(.15), () -> elevatorSubsystem.stopMotor(), elevatorSubsystem));
+        // new Trigger(operatorJoystick::getAButton).whileTrue(new StartEndCommand(() -> elevatorSubsystem.setElevatorSpeed(-.15), () -> elevatorSubsystem.stopMotor(), elevatorSubsystem));
+
+        new Trigger(operatorJoystick::getXButton).onTrue(new SequentialCommandGroup(
+            new ElevatorPIDCommand(elevatorSubsystem, 0),
+            new ArmExtendPIDCommand(armExtendSubsystem, 116)
+            ));
+    }
     @Override
     protected void configureButtonBindings() {
         /* driver Controls */
         // RESETS
-        new Trigger(driver::getBackButton).onTrue(new InstantCommand(drivetrain::zeroHeading, drivetrain));
+        // new Trigger(driver::getAButton).onTrue(new InstantCommand(drivetrain::zeroHeading, drivetrain));
         // new Trigger(driver::getStartButton).onTrue(new InstantCommand(() -> drivetrain.resetOdometry(new Pose2d())));
         // new Trigger(driver::getStartButton).onTrue(new InstantCommand(() -> drivetrain.setHeading(180)));
 
-        new Trigger(driver::getAButton).onTrue(new InstantCommand(drivetrain::resetNeoAngle));
+        // new Trigger(driver::getAButton).onTrue(new InstantCommand(drivetrain::resetNeoAngle));
 
         // GAME PIECE SET
-
-
+        // Open claw with right trigger axis. Close claw with left trigger axis. 
+        // new Trigger(operatorJoystick::getAButton).whileTrue(new (() -> elevatorSubsystem.setElevatorSpeed(-.15)));
+        
         //SET DRIVE PODS TO 45
         new Trigger(driver::getXButton).whileTrue(new RunCommand(() -> drivetrain.stop(), drivetrain));
 
@@ -69,9 +107,9 @@ public class RobotContainer extends LightningContainer {
         // new Trigger(driver::getBButton).onTrue(new InstantCommand(() -> servoturn.turnServo(AutonomousConstants.SERVO_DEPLOY)));
         // new Trigger(driver::getBButton).onFalse(new InstantCommand(() -> servoturn.turnServo(AutonomousConstants.SERVO_STOW)));
 
-
-        //AUTOBALANCE
-        // new Trigger(driver::getBButton).whileTrue(new AutoBalance(drivetrain));
+        
+        // AUTOBALANCE
+        new Trigger(driver::getBButton).whileTrue(new AutoBalance(drivetrain));
 
         /* copilot controls */
         //BIAS
