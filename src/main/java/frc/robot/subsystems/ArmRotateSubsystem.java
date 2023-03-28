@@ -19,11 +19,13 @@ public class ArmRotateSubsystem extends SubsystemBase{
       TalonSRX armRotateMotor = new TalonSRX(OperationConstants.armRotateMotorChannel);
       Encoder armRotateEncoder = new Encoder(OperationConstants.karmRotateEncoderA, OperationConstants.karmRotateEncoderB);
 
+
       @Override
       public void periodic() {
 
         // SmartDashboard.putNumber("Arm Rotate Encoder", getEncoderMeters());
         SmartDashboard.putNumber("Arm Rotate Encoder", armRotateEncoder.getDistance());
+        System.out.println(armRotateEncoder.getDistance());
         // This method will be called once per scheduler run
       }
     

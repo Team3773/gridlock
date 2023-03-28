@@ -2,6 +2,8 @@ package frc.robot.commands;
 
 import frc.robot.subsystems.ClawSubsystem;
 import java.util.function.Supplier;
+
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 
 public class ClawCommand extends CommandBase{
@@ -28,13 +30,16 @@ public class ClawCommand extends CommandBase{
         double openSpeed = openSpeedFunction.get();
         double closeSpeed = closeSpeedFunction.get();
 
+        SmartDashboard.putNumber("Open Speed", openSpeed);
+        SmartDashboard.putNumber("Close Speed", closeSpeed);
+
         // If close speed is almost zero and open speed is abs greater than zero, open
         // Deadband of 0.05
-        if(Math.abs(closeSpeed) < 0.1 && Math.abs(openSpeed) > 0.1)
+        if(Math.abs(closeSpeed) < 0.05 && Math.abs(openSpeed) > 0.05)
         {
             clawSpeed = openSpeed;
         }
-        else if(Math.abs(closeSpeed) > 0.1 && Math.abs(openSpeed) < 0.1)
+        else if(Math.abs(closeSpeed) > 0.05 && Math.abs(openSpeed) < 0.05)
         {
             clawSpeed = -closeSpeed;
         }
@@ -44,7 +49,7 @@ public class ClawCommand extends CommandBase{
             System.out.print("ZERO CLAW");
         }
 
-        clawSub.setClawSpeed(clawSpeed);
+        clawSub.setClawSpeed(clawSpeed * 0.25);
     }
 
     // Called once the command ends or is interrupted.

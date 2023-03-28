@@ -28,8 +28,8 @@ public class ArmExtendSubsystem extends SubsystemBase{
       @Override
       public void periodic() {
         // armExtendEncoder.setPositionConversionFactor(OperationConstants.kElevatorEncoderRot2Meter);        SmartDashboard.putNumber("Arm Rotate Encoder", armRotateEncoder.getDistance());
-        SmartDashboard.putNumber("Arm Rotate Encoder", armExtendEncoder.getDistance());
-
+        SmartDashboard.putNumber("Arm Extend Encoder", armExtendEncoder.getDistance());
+        System.out.println(armExtendEncoder.getDistance());
         // SmartDashboard.putNumber("Arm Extend Encoder: ", getEncoderMeters());
         // This method will be called once per scheduler run
       }

@@ -14,11 +14,12 @@ public class ClawSubsystem extends SubsystemBase{
     {
       // RESET IN START POSITION
       clawEncoder.setPosition(0);
+      clawMotor.setIdleMode(CANSparkMax.IdleMode.kBrake);
 
     }
       CANSparkMax clawMotor = new CANSparkMax(OperationConstants.clawMotorChannel, MotorType.kBrushless);
-      RelativeEncoder clawEncoder = clawMotor.getEncoder();  
-    
+      RelativeEncoder clawEncoder = clawMotor.getEncoder();
+
       @Override
       public void periodic() {
         clawEncoder.setPositionConversionFactor(OperationConstants.kClawEncoderRot2Meter);

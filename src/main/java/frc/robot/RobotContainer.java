@@ -20,6 +20,7 @@ import frc.robot.Constants.XboxControllerConstants;
 import frc.robot.commands.ArmExtendCommand;
 import frc.robot.commands.ArmExtendPIDCommand;
 import frc.robot.commands.ArmRotateCommand;
+import frc.robot.commands.ArmRotatePIDCommand;
 import frc.robot.commands.AutoAlign;
 import frc.robot.commands.AutoBalance;
 import frc.robot.commands.ClawCommand;
@@ -66,22 +67,40 @@ public class RobotContainer extends LightningContainer {
     
     public RobotContainer()
     {
-        // clawSubsystem.set
-        clawSubsystem.setDefaultCommand(new ClawCommand(clawSubsystem, () -> operatorJoystick.getRightTriggerAxis() * 0.1, () -> operatorJoystick.getLeftTriggerAxis() * 0.1));
-        // new Trigger(operatorJoystick::getAButton).whileTrue(new InstantCommand(() -> clawSubsystem.setClawSpeed(.15)));
+        // OPEN AND CLOSE CLAW
+        clawSubsystem.setDefaultCommand(new ClawCommand(clawSubsystem, () -> operatorJoystick.getRightTriggerAxis(), () -> operatorJoystick.getLeftTriggerAxis()));
 
-        // Extend or retract arm with right y-axis.
+        // EXTEND ARM
         armExtendSubsystem.setDefaultCommand(new ArmExtendCommand(armExtendSubsystem, () -> operatorJoystick.getLeftY()));
         
-        // Rotate arm with left y-axis.
+        // ROTATE ARM
         armRotateSubsystem.setDefaultCommand(new ArmRotateCommand(armRotateSubsystem, () -> operatorJoystick.getRightY()));
-        // new Trigger(operatorJoystick::getAButton).whileTrue(new ElevatorCommand(elevatorSubsystem, -.15));
-        new Trigger(operatorJoystick::getYButton).whileTrue(new StartEndCommand(() -> elevatorSubsystem.setElevatorSpeed(.15), () -> elevatorSubsystem.stopMotor(), elevatorSubsystem));
-        // new Trigger(operatorJoystick::getAButton).whileTrue(new StartEndCommand(() -> elevatorSubsystem.setElevatorSpeed(-.15), () -> elevatorSubsystem.stopMotor(), elevatorSubsystem));
 
+        // ELEVATOR MANUAL
+        new Trigger(operatorJoystick::getAButton).whileTrue(new StartEndCommand(() -> elevatorSubsystem.setElevatorSpeed(.15), () -> elevatorSubsystem.stopMotor(), elevatorSubsystem));
+        new Trigger(operatorJoystick::getYButton).whileTrue(new StartEndCommand(() -> elevatorSubsystem.setElevatorSpeed(-.15), () -> elevatorSubsystem.stopMotor(), elevatorSubsystem));
+
+        // PRESETS
+
+        // PICK FROM FLOOR
         new Trigger(operatorJoystick::getXButton).onTrue(new SequentialCommandGroup(
             new ElevatorPIDCommand(elevatorSubsystem, 0),
+            new ArmRotatePIDCommand(armRotateSubsystem, 1.75),
+            new ArmExtendPIDCommand(armExtendSubsystem, 374.25)
+            ));
+        
+        // PLACE ON SHELF
+        new Trigger(operatorJoystick::getBButton).onTrue(new SequentialCommandGroup(
+            new ElevatorPIDCommand(elevatorSubsystem, 0),
+            new ArmRotatePIDCommand(armRotateSubsystem, 0),
             new ArmExtendPIDCommand(armExtendSubsystem, 116)
+            ));
+
+        new Trigger(operatorJoystick::getRightBumper).onTrue(new SequentialCommandGroup(
+            new InstantCommand(() -> elevatorSubsystem.zeroEncoder()),
+            new InstantCommand(() -> armExtendSubsystem.zeroEncoder()),
+            new InstantCommand(() -> clawSubsystem.zeroEncoder()),
+            new InstantCommand(() -> armRotateSubsystem.zeroEncoder())
             ));
     }
     @Override
@@ -93,10 +112,6 @@ public class RobotContainer extends LightningContainer {
         // new Trigger(driver::getStartButton).onTrue(new InstantCommand(() -> drivetrain.setHeading(180)));
 
         // new Trigger(driver::getAButton).onTrue(new InstantCommand(drivetrain::resetNeoAngle));
-
-        // GAME PIECE SET
-        // Open claw with right trigger axis. Close claw with left trigger axis. 
-        // new Trigger(operatorJoystick::getAButton).whileTrue(new (() -> elevatorSubsystem.setElevatorSpeed(-.15)));
         
         //SET DRIVE PODS TO 45
         new Trigger(driver::getXButton).whileTrue(new RunCommand(() -> drivetrain.stop(), drivetrain));
@@ -107,15 +122,11 @@ public class RobotContainer extends LightningContainer {
         // new Trigger(driver::getBButton).onTrue(new InstantCommand(() -> servoturn.turnServo(AutonomousConstants.SERVO_DEPLOY)));
         // new Trigger(driver::getBButton).onFalse(new InstantCommand(() -> servoturn.turnServo(AutonomousConstants.SERVO_STOW)));
 
-        
         // AUTOBALANCE
         new Trigger(driver::getBButton).whileTrue(new AutoBalance(drivetrain));
 
         /* copilot controls */
         //BIAS
-
-        //SETPOINTS
-
     }
 
     // Creates the autonomous commands
@@ -123,42 +134,42 @@ public class RobotContainer extends LightningContainer {
     protected void configureAutonomousCommands() {
         //Test paths 
 
-        // // Game paths
-        // //A paths
-        // // autoFactory.makeTrajectory("A1[2]-M", Maps.getPathMap(drivetrain, servoturn, lift, collector, leds),
-        // //         new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
-        // // autoFactory.makeTrajectory("A1[2]-M-C", Maps.getPathMap(drivetrain, servoturn, lift, collector, leds),
-        // //         new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
-        // // autoFactory.makeTrajectory("A1[3]-M", Maps.getPathMap(drivetrain, servoturn, lift, collector, leds),
-        // //         new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
-        // autoFactory.makeTrajectory("A2[1]-M", Maps.getPathMap(drivetrain, servoturn, lift, collector),
+        // Game paths
+        // A paths
+        // autoFactory.makeTrajectory("A1[2]-M", Maps.getPathMap(drivetrain),
         //         new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
-        // autoFactory.makeTrajectory("A2[1]-M-HIGH", Maps.getPathMap(drivetrain, servoturn, lift, collector), 
+        // autoFactory.makeTrajectory("A1[2]-M", Maps.getPathMap(drivetrain),
         //         new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
-        // autoFactory.makeTrajectory("A2[1]-M-C", Maps.getPathMap(drivetrain, servoturn, lift, collector),
+        // autoFactory.makeTrajectory("A1[3]-M", Maps.getPathMap(drivetrain),
+        //         new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
+        // autoFactory.makeTrajectory("A2[1]-M", Maps.getPathMap(drivetrain),
+        //         new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
+        // autoFactory.makeTrajectory("A2[1]-M-HIGH", Maps.getPathMap(drivetrain), 
+        //         new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
+        // autoFactory.makeTrajectory("A2[1]-M-C", Maps.getPathMap(drivetrain),
         //         new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
         // //B paths
-        // autoFactory.makeTrajectory("B2[1]-C", Maps.getPathMap(drivetrain, servoturn, lift, collector),
+        // autoFactory.makeTrajectory("B2[1]-C", Maps.getPathMap(drivetrain),
         //         new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
-        // // autoFactory.makeTrajectory("B2[1]-M-C", Maps.getPathMap(drivetrain, servoturn, lift, collector, leds),
-        // //         new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
-        // // autoFactory.makeTrajectory("B2[2]-M-C", Maps.getPathMap(drivetrain, servoturn, lift, collector, leds),
-        // //         new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
-        // autoFactory.makeTrajectory("B2[1]-C-HIGH", Maps.getPathMap(drivetrain, servoturn, lift, collector),
+        // autoFactory.makeTrajectory("B2[1]-M-C", Maps.getPathMap(drivetrain),
+        //         new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
+        // autoFactory.makeTrajectory("B2[2]-M-C", Maps.getPathMap(drivetrain),
+        //         new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
+        // autoFactory.makeTrajectory("B2[1]-C-HIGH", Maps.getPathMap(drivetrain),
         //         new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
         // //C paths
-        // autoFactory.makeTrajectory("C2[1]-M", Maps.getPathMap(drivetrain, servoturn, lift, collector),
+        // autoFactory.makeTrajectory("C2[1]-M", Maps.getPathMap(drivetrain),
         //         new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
-        // autoFactory.makeTrajectory("C2[1]-M-HIGH", Maps.getPathMap(drivetrain, servoturn, lift, collector), 
+        // autoFactory.makeTrajectory("C2[1]-M-HIGH", Maps.getPathMap(drivetrain), 
         //         new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
-        // autoFactory.makeTrajectory("C2[1]-M-C", Maps.getPathMap(drivetrain, servoturn, lift, collector),
+        // autoFactory.makeTrajectory("C2[1]-M-C", Maps.getPathMap(drivetrain),
         //         new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
-        // // autoFactory.makeTrajectory("C2[2]-M", Maps.getPathMap(drivetrain, servoturn, lift, collector, leds),
-        // //         new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
-        // // autoFactory.makeTrajectory("C2[2]-M-C", Maps.getPathMap(drivetrain, servoturn, lift, collector, leds),
-        // //         new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
-        // // autoFactory.makeTrajectory("C2[3]-M", Maps.getPathMap(drivetrain, servoturn, lift, collector, leds),
-        // //         new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
+        // autoFactory.makeTrajectory("C2[2]-M", Maps.getPathMap(drivetrain),
+        //         new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
+        // autoFactory.makeTrajectory("C2[2]-M-C", Maps.getPathMap(drivetrain),
+        //         new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
+        // autoFactory.makeTrajectory("C2[3]-M", Maps.getPathMap(drivetrain),
+        //         new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
     }
 
     @Override

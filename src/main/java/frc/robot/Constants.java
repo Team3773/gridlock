@@ -80,8 +80,8 @@ public final class Constants {
         public static final double kClawSetpoint = 0;
   
         // DAMPNERS
-        public static final double kArmRotateDampner = .5;
-        public static final double kArmExtendDampner = .5;
+        public static final double kArmRotateDampner = .8;
+        public static final double kArmExtendDampner = .8;
         public static final double kSwerveDeadband = 0.1;
         public static final double setpointDeadband = 5;
   
@@ -108,7 +108,7 @@ public final class Constants {
   
         public static final int limitSwitchPort = 4;
       }
-      
+
     // Constants for our system tests    
     public static final class SystemTestConstants {
         // Drive Test Variables
@@ -277,6 +277,7 @@ public final class Constants {
 
         // Delay time for our auto balance after falling
         public static final double DELAY_TIME = 1.5;
+        public static final double LOG_PERIOD = 0.2;
 
         // Target X position for the middle of the charge station
         public static final double TARGET_X = 3.93;
