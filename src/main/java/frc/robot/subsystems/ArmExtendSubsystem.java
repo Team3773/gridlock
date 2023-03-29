@@ -19,7 +19,7 @@ public class ArmExtendSubsystem extends SubsystemBase{
     {
       // RESET IN START POSITION
       armExtendEncoder.reset();
-      armExtendMotor.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 10, 15, 0.5));
+      armExtendMotor.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 5, 10, 0.5));
     }
       TalonSRX armExtendMotor = new TalonSRX(OperationConstants.armExtendMotorChannel);
       // CANSparkMax armExtendMotor = new CANSparkMax(OperationConstants.armExtendMotorChannel, MotorType.kBrushless);

@@ -14,6 +14,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.util.Color;
@@ -147,6 +148,11 @@ public final class Constants {
         public static final double MAX_VELOCITY_METERS_PER_SECOND = 5; //12
         public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = 4* Math.PI;//MAX_VELOCITY_METERS_PER_SECOND / Math.hypot(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0);
         public static final double MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND = 3;//MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND * 2 * Math.PI / 5;
+
+        public static final TrapezoidProfile.Constraints kThetaControllerConstraints = //
+        new TrapezoidProfile.Constraints(
+            MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+            MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND);
 
         // Module configuration constants
         public static final int DRIVE_CURRENT_LIMIT = 20; //40;
@@ -308,7 +314,7 @@ public final class Constants {
         public static final PIDConstants DRIVE_PID_CONSTANTS = new PIDConstants(2.5, 0, 0); // Drive velocity PID 10.5
         public static final PIDConstants THETA_PID_CONSTANTS = new PIDConstants(4, 0, 0); // Rotation PID 7
         public static final PIDConstants POSE_PID_CONSTANTS = new PIDConstants(0, 0, 0); // X and Y position PID
-
+        
         // Max velocity and acceleration for the path planner
         public static final double MAX_VELOCITY = 1.5;
         public static final double MAX_ACCELERATION = .5;

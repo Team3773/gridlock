@@ -2,9 +2,18 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import java.util.HashMap;
+import java.util.List;
+
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.TrajectoryConfig;
+import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import frc.robot.subsystems.LimelightBack;
@@ -13,6 +22,7 @@ import frc.robot.subsystems.LimelightFront;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
+import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import frc.robot.subsystems.ServoTurn;
 // import frc.robot.subsystems.ShuffleBoard;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -35,6 +45,7 @@ import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.thunder.LightningContainer;
 import frc.robot.Constants.AutonomousConstants;
+import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.Constants.LimelightConstants;
 import frc.thunder.auto.AutonomousCommandFactory;
 import frc.thunder.filter.JoystickFilter;
@@ -91,9 +102,9 @@ public class RobotContainer extends LightningContainer {
         
         // PLACE ON SHELF
         new Trigger(operatorJoystick::getBButton).onTrue(new SequentialCommandGroup(
-            new ElevatorPIDCommand(elevatorSubsystem, 0),
-            new ArmRotatePIDCommand(armRotateSubsystem, 0),
-            new ArmExtendPIDCommand(armExtendSubsystem, 116)
+            // new ElevatorPIDCommand(elevatorSubsystem, 0),
+            new ArmRotatePIDCommand(armRotateSubsystem, 90)
+            // new ArmExtendPIDCommand(armExtendSubsystem, 116)
             ));
 
         new Trigger(operatorJoystick::getRightBumper).onTrue(new SequentialCommandGroup(
@@ -136,8 +147,8 @@ public class RobotContainer extends LightningContainer {
 
         // Game paths
         // A paths
-        // autoFactory.makeTrajectory("A1[2]-M", Maps.getPathMap(drivetrain),
-        //         new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
+        autoFactory.makeTrajectory("A1[2]-M", Maps.getPathMap(drivetrain),
+                new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
         // autoFactory.makeTrajectory("A1[2]-M", Maps.getPathMap(drivetrain),
         //         new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
         // autoFactory.makeTrajectory("A1[3]-M", Maps.getPathMap(drivetrain),
@@ -170,6 +181,79 @@ public class RobotContainer extends LightningContainer {
         //         new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
         // autoFactory.makeTrajectory("C2[3]-M", Maps.getPathMap(drivetrain),
         //         new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
+    }
+
+    public Command moveForward()
+    {
+        SequentialCommandGroup driveauto = new SequentialCommandGroup(
+            new SwerveDrive(drivetrain, () -> MathUtil.applyDeadband(driver.getLeftX(), XboxControllerConstants.DEADBAND),
+                    () -> MathUtil.applyDeadband(driver.getLeftY(), XboxControllerConstants.DEADBAND), () -> MathUtil.applyDeadband(-driver.getRightX(), XboxControllerConstants.DEADBAND),
+                    () -> driver.getRightTriggerAxis() > 0.25));
+
+        return driveauto;
+    }
+
+    public Command getAutonomousCommand() {
+        // 1. Create trajectory settings
+        TrajectoryConfig trajectoryConfig = new TrajectoryConfig(
+            DrivetrainConstants.MAX_VELOCITY_METERS_PER_SECOND,
+            DrivetrainConstants.MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND)
+                        .setKinematics(drivetrain.getDriveKinematics());
+
+        // 2. Generate trajectory
+        Trajectory trajectory = TrajectoryGenerator.generateTrajectory(
+                // Initial point
+                new Pose2d(1.96, 2.71, new Rotation2d(0)),
+                List.of(
+                        // Other points
+                        new Translation2d(2.98, 2.71),
+                        new Translation2d(3.3, 2.71)),
+                //Final points
+                new Pose2d(3.90, 2.71, Rotation2d.fromDegrees(0)), // CHANGED FROM 180 deg
+                trajectoryConfig);
+
+        // 3. Define PID controllers for tracking trajectory
+        PIDController xController = new PIDController(.5, 0, 0);
+        PIDController yController = new PIDController(.5, 0, 0);
+        // Profile to max interval
+        ProfiledPIDController thetaController = new ProfiledPIDController(
+                0.5, 0, 0, DrivetrainConstants.kThetaControllerConstraints);
+        thetaController.enableContinuousInput(-Math.PI, Math.PI);
+
+        // 4. Construct command to follow trajectory
+        SwerveControllerCommand swerveControllerCommand = new SwerveControllerCommand(
+                trajectory,
+                drivetrain::getPose,
+                drivetrain.getDriveKinematics(),
+                xController,
+                yController,
+                thetaController,
+                drivetrain::updateDriveStates,
+                drivetrain);
+        
+        SequentialCommandGroup auton = new SequentialCommandGroup(
+                /**
+                 * Path description: 
+                 * Robot starts in community by gates. 
+                 * Extends arm. 
+                 * Opens claw. 
+                 * Places cube.
+                 * Drives back onto charge station.
+                 */
+
+                 // Extend Arm
+                // new ArmExtendPIDCommand(armExtendSubsystem, OperationConstants.kArmExtendSetpoint),
+                // // Open Claw
+                // new ClawPIDCommand(clawSubsystem, OperationConstants.kClawSetpoint),
+                // Initialize swerve
+                new InstantCommand(() -> drivetrain.resetOdometry(trajectory.getInitialPose())),
+                // Follow swerve trajectory defined in 2
+                swerveControllerCommand,
+                // Balance on Beam
+                // Stop swerve
+                new InstantCommand(() -> drivetrain.stop()));
+
+        return auton;
     }
 
     @Override
