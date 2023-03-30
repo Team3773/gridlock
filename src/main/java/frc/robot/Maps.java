@@ -6,15 +6,17 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import frc.robot.Constants.AutonomousConstants;
+import frc.robot.commands.ArmRotateCommand;
+import frc.robot.commands.ArmRotatePIDCommand;
 import frc.robot.commands.AutoBalance;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.ServoTurn;
+import frc.robot.subsystems.ArmRotateSubsystem;
 
 /**
  * Class for creating all auton HasMaps
  */
 public class Maps {
-
     /**
      * The general Hash map for all paths. 
      * Has most calls needed for the paths to run.
@@ -23,9 +25,11 @@ public class Maps {
      * @param drivetrain
      * @return
      */
-    public static HashMap<String, Command> getPathMap(Drivetrain drivetrain) {
+    public static HashMap<String, Command> getPathMap(Drivetrain drivetrain, ArmRotateSubsystem armRotateSub) {
+
         HashMap<String, Command> eventMap = new HashMap<>();
-        // eventMap.put("Score-Piece-Servo", new InstantCommand(() -> servoturn.turnServo(AutonomousConstants.SERVO_DEPLOY), servoturn));
+        eventMap.put("Fling", new ArmRotatePIDCommand(armRotateSub, 30));
+        // eventMap.put("Fling", new InstantCommand(() -> armRotateSub.setArmRotateSpeed(.5)));
         // eventMap.put("Ground-Collect-Cone", new RunCommand(() -> lift.setGoalState(LiftState.groundCone), lift).until(lift::goalReached));
         // eventMap.put("Ground-Collect-Cube", new RunCommand(() -> lift.setGoalState(LiftState.groundCube), lift).until(lift::goalReached));
         // eventMap.put("Ground-Score", new RunCommand(() -> lift.setGoalState(LiftState.groundCube), lift).until(lift::goalReached));  

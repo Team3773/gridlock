@@ -46,7 +46,6 @@ public class ClawCommand extends CommandBase{
         else
         {
             clawSpeed = 0;
-            System.out.print("ZERO CLAW");
         }
 
         clawSub.setClawSpeed(clawSpeed * 0.25);

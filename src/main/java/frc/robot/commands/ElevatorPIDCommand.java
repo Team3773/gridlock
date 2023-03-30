@@ -48,7 +48,7 @@ public class ElevatorPIDCommand extends CommandBase{
           }else{
             elevatorCounter = 0;
           }
-          if(elevatorCounter >= 20){
+          if(elevatorCounter >= 50){
             return true;
           }
           return false;

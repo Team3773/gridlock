@@ -15,7 +15,7 @@ public class ArmRotatePIDCommand extends CommandBase{
     {
         this.setpoint = setpoint;
         armRotateSub = subsystem;
-        this.pidController = new PIDController(0.5, 0, 0); 
+        this.pidController = new PIDController(0.05, 0, 0); 
         pidController.setSetpoint(setpoint);
         
         addRequirements(armRotateSub);
@@ -46,7 +46,7 @@ public class ArmRotatePIDCommand extends CommandBase{
           }else{
             armRotateCounter = 0;
           }
-          if(armRotateCounter >= 20){
+          if(armRotateCounter >= 50){
             return true;
           }
           return false;

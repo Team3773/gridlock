@@ -1,12 +1,12 @@
 package frc.robot;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import java.util.HashMap;
 import java.util.List;
+import java.util.function.Consumer;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
@@ -15,17 +15,15 @@ import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import frc.robot.subsystems.LimelightBack;
-import frc.robot.subsystems.LimelightFront;
-
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
-import frc.robot.subsystems.ServoTurn;
 // import frc.robot.subsystems.ShuffleBoard;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.AutonomousConstants;
+import frc.robot.Constants.DrivetrainConstants;
+import frc.robot.Constants.LimelightConstants;
 import frc.robot.Constants.XboxControllerConstants;
 import frc.robot.commands.ArmExtendCommand;
 import frc.robot.commands.ArmExtendPIDCommand;
@@ -34,7 +32,6 @@ import frc.robot.commands.ArmRotatePIDCommand;
 import frc.robot.commands.AutoAlign;
 import frc.robot.commands.AutoBalance;
 import frc.robot.commands.ClawCommand;
-import frc.robot.commands.ElevatorCommand;
 import frc.robot.commands.ElevatorPIDCommand;
 import frc.robot.commands.SwerveDrive;
 import frc.robot.commands.tests.DriveTrainSystemTest;
@@ -43,10 +40,9 @@ import frc.robot.subsystems.ArmRotateSubsystem;
 import frc.robot.subsystems.ClawSubsystem;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.LimelightBack;
+import frc.robot.subsystems.LimelightFront;
 import frc.thunder.LightningContainer;
-import frc.robot.Constants.AutonomousConstants;
-import frc.robot.Constants.DrivetrainConstants;
-import frc.robot.Constants.LimelightConstants;
 import frc.thunder.auto.AutonomousCommandFactory;
 import frc.thunder.filter.JoystickFilter;
 import frc.thunder.filter.JoystickFilter.Mode;
@@ -73,8 +69,17 @@ public class RobotContainer extends LightningContainer {
     private static final JoystickFilter joystickFilter = new JoystickFilter(XboxControllerConstants.DEADBAND, XboxControllerConstants.MIN_POWER, XboxControllerConstants.MAX_POWER, Mode.CUBED);
 
     // creates Autonomous Command
-    private static final AutonomousCommandFactory autoFactory = new AutonomousCommandFactory(drivetrain::getPose, drivetrain::resetOdometry, drivetrain.getDriveKinematics(),
-            AutonomousConstants.DRIVE_PID_CONSTANTS, AutonomousConstants.THETA_PID_CONSTANTS, AutonomousConstants.POSE_PID_CONSTANTS, drivetrain::setStates, drivetrain::resetNeoAngle, drivetrain);
+private static final AutonomousCommandFactory autoFactory = new AutonomousCommandFactory(
+        drivetrain::getPose,
+        new Consumer<Boolean>(){public void accept(Boolean arg0) {};},
+        drivetrain::resetOdometry,
+        drivetrain.getDriveKinematics(),      
+        AutonomousConstants.DRIVE_PID_CONSTANTS,
+        AutonomousConstants.THETA_PID_CONSTANTS,
+        AutonomousConstants.POSE_PID_CONSTANTS,
+        drivetrain::setStates,
+        drivetrain::resetNeoAngle,
+        drivetrain);
     
     public RobotContainer()
     {
@@ -114,6 +119,7 @@ public class RobotContainer extends LightningContainer {
             new InstantCommand(() -> armRotateSubsystem.zeroEncoder())
             ));
     }
+    
     @Override
     protected void configureButtonBindings() {
         /* driver Controls */
@@ -147,7 +153,7 @@ public class RobotContainer extends LightningContainer {
 
         // Game paths
         // A paths
-        autoFactory.makeTrajectory("A1[2]-M", Maps.getPathMap(drivetrain),
+        autoFactory.makeTrajectory("A1[2]-M", Maps.getPathMap(drivetrain, armRotateSubsystem),
                 new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
         // autoFactory.makeTrajectory("A1[2]-M", Maps.getPathMap(drivetrain),
         //         new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
@@ -159,7 +165,7 @@ public class RobotContainer extends LightningContainer {
         //         new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
         // autoFactory.makeTrajectory("A2[1]-M-C", Maps.getPathMap(drivetrain),
         //         new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
-        // //B paths
+        //B paths
         // autoFactory.makeTrajectory("B2[1]-C", Maps.getPathMap(drivetrain),
         //         new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
         // autoFactory.makeTrajectory("B2[1]-M-C", Maps.getPathMap(drivetrain),
@@ -168,7 +174,7 @@ public class RobotContainer extends LightningContainer {
         //         new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
         // autoFactory.makeTrajectory("B2[1]-C-HIGH", Maps.getPathMap(drivetrain),
         //         new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
-        // //C paths
+        //C paths
         // autoFactory.makeTrajectory("C2[1]-M", Maps.getPathMap(drivetrain),
         //         new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
         // autoFactory.makeTrajectory("C2[1]-M-HIGH", Maps.getPathMap(drivetrain), 

@@ -15,7 +15,7 @@ public class ClawPIDCommand extends CommandBase{
     {
         this.setpoint = setpoint;
         clawSubsystem = subsystem;
-        this.pidController = new PIDController(0.15, 0, 0); 
+        this.pidController = new PIDController(0.05, 0, 0); 
         pidController.setSetpoint(setpoint);
         
         addRequirements(clawSubsystem);
@@ -48,7 +48,7 @@ public class ClawPIDCommand extends CommandBase{
           }else{
             clawCounter = 0;
           }
-          if(clawCounter >= 20){
+          if(clawCounter >= 50){
             return true;
           }
           return false;

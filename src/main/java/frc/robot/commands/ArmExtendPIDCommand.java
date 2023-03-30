@@ -15,7 +15,7 @@ public class ArmExtendPIDCommand extends CommandBase{
     {
         this.setpoint = setpoint;
         armExtendSubsystem = subsystem;
-        this.pidController = new PIDController(0.15, 0, 0); 
+        this.pidController = new PIDController(0.05, 0, 0); 
         pidController.setSetpoint(setpoint);
         
         addRequirements(armExtendSubsystem);
@@ -46,7 +46,7 @@ public class ArmExtendPIDCommand extends CommandBase{
           }else{
             extendCounter = 0;
           }
-          if(extendCounter >= 20){
+          if(extendCounter >= 50){
             return true;
           }
           return false;

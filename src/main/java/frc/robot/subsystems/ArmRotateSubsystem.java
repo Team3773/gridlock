@@ -25,7 +25,6 @@ public class ArmRotateSubsystem extends SubsystemBase{
 
         // SmartDashboard.putNumber("Arm Rotate Encoder", getEncoderMeters());
         SmartDashboard.putNumber("Arm Rotate Encoder", armRotateEncoder.getDistance());
-        System.out.println(armRotateEncoder.getDistance());
         // This method will be called once per scheduler run
       }
     
