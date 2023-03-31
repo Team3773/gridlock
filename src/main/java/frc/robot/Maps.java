@@ -30,7 +30,7 @@ public class Maps {
     public static HashMap<String, Command> getPathMap(Drivetrain drivetrain, ArmExtendSubsystem armExtendSubsystem) {
 
         HashMap<String, Command> eventMap = new HashMap<>();
-        eventMap.put("Fling", new ArmExtendPIDCommand(armExtendSubsystem, 9));
+        eventMap.put("Fling", new ArmExtendPIDCommand(armExtendSubsystem, 45));
         // eventMap.put("Fling", new RunCommand(() -> armRotateSub.setArmRotateSpeed(0.3).until(armRotateSub.stopArm())));
 
         // new ArmRotatePIDCommand(armRotateSub, 30));

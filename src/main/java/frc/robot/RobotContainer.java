@@ -103,11 +103,11 @@ private static final AutonomousCommandFactory autoFactory = new AutonomousComman
         // PRESETS
 
         // PICK FROM FLOOR
-        // new Trigger(operatorJoystick::getXButton).onTrue(new SequentialCommandGroup(
-        //     new ElevatorPIDCommand(elevatorSubsystem, 0),
-        //     new ArmRotatePIDCommand(armRotateSubsystem, 1.75),
-        //     new ArmExtendPIDCommand(armExtendSubsystem, 374.25)
-        //     ));
+        new Trigger(operatorJoystick::getBButton).onTrue(new SequentialCommandGroup(
+            new ElevatorPIDCommand(elevatorSubsystem, 0),
+            // new ArmRotatePIDCommand(armRotateSubsystem, 1.75),
+            new ArmExtendPIDCommand(armExtendSubsystem, 53)
+            ));
         
         // // PLACE ON SHELF
         // new Trigger(operatorJoystick::getBButton).onTrue(new SequentialCommandGroup(
@@ -139,13 +139,13 @@ private static final AutonomousCommandFactory autoFactory = new AutonomousComman
         new Trigger(driver::getXButton).whileTrue(new RunCommand(() -> drivetrain.stop(), drivetrain));
 
         //AUTO ALIGN
-        new Trigger(driver::getYButton).whileTrue(new AutoAlign(drivetrain, frontLimelight));
+        // new Trigger(driver::getYButton).whileTrue(new AutoAlign(drivetrain, frontLimelight));
 
         // new Trigger(driver::getBButton).onTrue(new InstantCommand(() -> servoturn.turnServo(AutonomousConstants.SERVO_DEPLOY)));
         // new Trigger(driver::getBButton).onFalse(new InstantCommand(() -> servoturn.turnServo(AutonomousConstants.SERVO_STOW)));
 
         // AUTOBALANCE
-        new Trigger(driver::getBButton).whileTrue(new AutoBalance(drivetrain));
+        // new Trigger(driver::getBButton).whileTrue(new AutoBalance(drivetrain));
 
         /* copilot controls */
         //BIAS
@@ -158,10 +158,13 @@ private static final AutonomousCommandFactory autoFactory = new AutonomousComman
 
         // Game paths
         // A paths
-        autoFactory.makeTrajectory("A1[2]-M", Maps.getPathMap(drivetrain, armExtendSubsystem),
+        // RED
+        autoFactory.makeTrajectory("RED", Maps.getPathMap(drivetrain, armExtendSubsystem),
                 new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
-        // autoFactory.makeTrajectory("A1[2]-M", Maps.getPathMap(drivetrain),
-        //         new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
+        
+        // BLUE
+        autoFactory.makeTrajectory("BLUE", Maps.getPathMap(drivetrain, armExtendSubsystem),
+                new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
         // autoFactory.makeTrajectory("A1[3]-M", Maps.getPathMap(drivetrain),
         //         new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
         // autoFactory.makeTrajectory("A2[1]-M", Maps.getPathMap(drivetrain),
