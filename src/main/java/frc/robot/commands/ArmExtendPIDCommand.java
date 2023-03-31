@@ -10,6 +10,7 @@ public class ArmExtendPIDCommand extends CommandBase{
     private final PIDController pidController;
     private double setpoint;
     private int extendCounter = 0;
+    // private Timer timer = new Timer();
 
     public ArmExtendPIDCommand(ArmExtendSubsystem subsystem, double setpoint)
     {
@@ -23,6 +24,7 @@ public class ArmExtendPIDCommand extends CommandBase{
     @Override
     public void initialize() {
         pidController.reset();
+        // timer.restart();
     }
 
     // Called every time the scheduler runs while the command is scheduled.
@@ -50,5 +52,10 @@ public class ArmExtendPIDCommand extends CommandBase{
             return true;
           }
           return false;
+        // if(timer.get() > 3)
+        // {
+        //     return true;
+        // }
+        // return false;
     }
 }

@@ -21,6 +21,7 @@ public class SwerveDrive extends CommandBase {
     private final DoubleSupplier m_translationYSupplier;
     private final DoubleSupplier m_rotationSupplier;
     private final BooleanSupplier slowMode;
+    private final BooleanSupplier boostMode;
 
     private double leftX;
     private double leftY;
@@ -34,12 +35,13 @@ public class SwerveDrive extends CommandBase {
      * @param translationYSupplier The control input for the translation in the Y direction
      * @param rotationSupplier The control input for rotation
      */
-    public SwerveDrive(Drivetrain drivetrainSubsystem, DoubleSupplier translationXSupplier, DoubleSupplier translationYSupplier, DoubleSupplier rotationSupplier, BooleanSupplier slowMode) {
+    public SwerveDrive(Drivetrain drivetrainSubsystem, DoubleSupplier translationXSupplier, DoubleSupplier translationYSupplier, DoubleSupplier rotationSupplier, BooleanSupplier slowMode, BooleanSupplier boostMode) {
         this.drivetrain = drivetrainSubsystem;
         this.m_translationXSupplier = translationXSupplier;
         this.m_translationYSupplier = translationYSupplier;
         this.m_rotationSupplier = rotationSupplier;
         this.slowMode = slowMode;
+        this.boostMode = boostMode;
 
         addRequirements(drivetrainSubsystem);
     }
@@ -61,6 +63,11 @@ public class SwerveDrive extends CommandBase {
             leftX = m_translationXSupplier.getAsDouble() * DrivetrainConstants.SLOW_MODE_TRANSLATIONAL_MULT;
             leftY = m_translationYSupplier.getAsDouble() * DrivetrainConstants.SLOW_MODE_TRANSLATIONAL_MULT;
             rightX = m_rotationSupplier.getAsDouble() * DrivetrainConstants.SLOW_MODE_ROTATIONAL_MULT;
+        } else if(boostMode.getAsBoolean())
+        {
+            leftX = m_translationXSupplier.getAsDouble();
+            leftY = m_translationYSupplier.getAsDouble();
+            rightX = m_rotationSupplier.getAsDouble();
         } else {
             leftX = m_translationXSupplier.getAsDouble() * 0.6;
             leftY = m_translationYSupplier.getAsDouble() * 0.6;

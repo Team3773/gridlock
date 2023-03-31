@@ -1,6 +1,8 @@
 package frc.robot.commands;
 
 import frc.robot.subsystems.ArmExtendSubsystem;
+
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.ArmRotateSubsystem;
@@ -9,13 +11,15 @@ public class ArmExtendCommand extends CommandBase{
     private final ArmExtendSubsystem armExtendSub;
     private final ArmRotateSubsystem armRotateSub;
     private final Supplier<Double> extendSpeedFunction;
+    private final BooleanSupplier ignoreZero;
 
-    public ArmExtendCommand(ArmExtendSubsystem subsystem, ArmRotateSubsystem armRotateSub, Supplier<Double> extendSpeedFunction)
+    public ArmExtendCommand(ArmExtendSubsystem subsystem, ArmRotateSubsystem armRotateSub, Supplier<Double> extendSpeedFunction, BooleanSupplier ignoreZero)
     {
         armExtendSub = subsystem;
         this.extendSpeedFunction = extendSpeedFunction; 
         this.armRotateSub = armRotateSub;
-        
+        this.ignoreZero = ignoreZero;
+
         addRequirements(armExtendSub);
     }
 
@@ -27,9 +31,11 @@ public class ArmExtendCommand extends CommandBase{
     // Runs repeatedly when command is called
     @Override
     public void execute() {
+        boolean ignore = ignoreZero.getAsBoolean();
         double extendSpeed = extendSpeedFunction.get();
+        // extendSpeed *= 1;
 
-        if(armExtendSub.isExtendAtZero() && armRotateSub.isRotateAtZero())
+        if(armExtendSub.isExtendAtZero() && armRotateSub.isRotateAtZero() && !ignore)
         {
             if(extendSpeed < 0)
             {

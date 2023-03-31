@@ -56,7 +56,7 @@ public class RobotContainer extends LightningContainer {
     private static final LimelightBack backLimelight = new LimelightBack(LimelightConstants.BACK_NAME, LimelightConstants.BACK_POSE);
     private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
     private final ClawSubsystem clawSubsystem = new ClawSubsystem();
-    private final ArmExtendSubsystem armExtendSubsystem = new ArmExtendSubsystem();
+    private static final ArmExtendSubsystem armExtendSubsystem = new ArmExtendSubsystem();
     private static final ArmRotateSubsystem armRotateSubsystem = new ArmRotateSubsystem();
     
     // Creating our main subsystems
@@ -87,11 +87,14 @@ private static final AutonomousCommandFactory autoFactory = new AutonomousComman
         // OPEN AND CLOSE CLAW
         clawSubsystem.setDefaultCommand(new ClawCommand(clawSubsystem, () -> MathUtil.applyDeadband(operatorJoystick.getRightTriggerAxis(), .02), () -> MathUtil.applyDeadband(operatorJoystick.getLeftTriggerAxis(), .02)));
 
+        // TODO: Invert (?)
         // EXTEND ARM
-        armExtendSubsystem.setDefaultCommand(new ArmExtendCommand(armExtendSubsystem, armRotateSubsystem, () -> MathUtil.applyDeadband(operatorJoystick.getLeftY(), .12)));
-        
+        // armExtendSubsystem.setDefaultCommand(new ArmExtendCommand(armExtendSubsystem, armRotateSubsystem, () -> MathUtil.applyDeadband(operatorJoystick.getLeftY(), .12)));
+        armExtendSubsystem.setDefaultCommand(new ArmExtendCommand(armExtendSubsystem, armRotateSubsystem, () -> MathUtil.applyDeadband(operatorJoystick.getLeftY(), .18), () -> operatorJoystick.getXButton()));
+
+        // TODO: Invert (?)
         // ROTATE ARM
-        armRotateSubsystem.setDefaultCommand(new ArmRotateCommand(armRotateSubsystem, armExtendSubsystem, () -> MathUtil.applyDeadband(operatorJoystick.getRightY(), .12)));
+        armRotateSubsystem.setDefaultCommand(new ArmRotateCommand(armRotateSubsystem, armExtendSubsystem, () -> MathUtil.applyDeadband(operatorJoystick.getRightY(), .18), () -> operatorJoystick.getXButton()));
 
         // ELEVATOR MANUAL
         new Trigger(operatorJoystick::getYButton).whileTrue(new StartEndCommand(() -> elevatorSubsystem.setElevatorSpeed(.15), () -> elevatorSubsystem.stopMotor(), elevatorSubsystem));
@@ -100,18 +103,18 @@ private static final AutonomousCommandFactory autoFactory = new AutonomousComman
         // PRESETS
 
         // PICK FROM FLOOR
-        new Trigger(operatorJoystick::getXButton).onTrue(new SequentialCommandGroup(
-            new ElevatorPIDCommand(elevatorSubsystem, 0),
-            new ArmRotatePIDCommand(armRotateSubsystem, 1.75),
-            new ArmExtendPIDCommand(armExtendSubsystem, 374.25)
-            ));
+        // new Trigger(operatorJoystick::getXButton).onTrue(new SequentialCommandGroup(
+        //     new ElevatorPIDCommand(elevatorSubsystem, 0),
+        //     new ArmRotatePIDCommand(armRotateSubsystem, 1.75),
+        //     new ArmExtendPIDCommand(armExtendSubsystem, 374.25)
+        //     ));
         
-        // PLACE ON SHELF
-        new Trigger(operatorJoystick::getBButton).onTrue(new SequentialCommandGroup(
-            // new ElevatorPIDCommand(elevatorSubsystem, 0),
-            new ArmRotatePIDCommand(armRotateSubsystem, 90)
-            // new ArmExtendPIDCommand(armExtendSubsystem, 116)
-            ));
+        // // PLACE ON SHELF
+        // new Trigger(operatorJoystick::getBButton).onTrue(new SequentialCommandGroup(
+        //     // new ElevatorPIDCommand(elevatorSubsystem, 0),
+        //     new ArmRotatePIDCommand(armRotateSubsystem, 90)
+        //     // new ArmExtendPIDCommand(armExtendSubsystem, 116)
+        //     ));
 
         new Trigger(operatorJoystick::getRightBumper).onTrue(new SequentialCommandGroup(
             new InstantCommand(() -> elevatorSubsystem.zeroEncoder()),
@@ -155,7 +158,7 @@ private static final AutonomousCommandFactory autoFactory = new AutonomousComman
 
         // Game paths
         // A paths
-        autoFactory.makeTrajectory("A1[2]-M", Maps.getPathMap(drivetrain, armRotateSubsystem),
+        autoFactory.makeTrajectory("A1[2]-M", Maps.getPathMap(drivetrain, armExtendSubsystem),
                 new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
         // autoFactory.makeTrajectory("A1[2]-M", Maps.getPathMap(drivetrain),
         //         new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
@@ -196,7 +199,7 @@ private static final AutonomousCommandFactory autoFactory = new AutonomousComman
         SequentialCommandGroup driveauto = new SequentialCommandGroup(
             new SwerveDrive(drivetrain, () -> MathUtil.applyDeadband(driver.getLeftX(), XboxControllerConstants.DEADBAND),
                     () -> MathUtil.applyDeadband(driver.getLeftY(), XboxControllerConstants.DEADBAND), () -> MathUtil.applyDeadband(-driver.getRightX(), XboxControllerConstants.DEADBAND),
-                    () -> driver.getRightTriggerAxis() > 0.25));
+                    () -> driver.getRightTriggerAxis() > 0.25, () -> driver.getLeftTriggerAxis() > 0.25));
 
         return driveauto;
     }
@@ -275,7 +278,7 @@ private static final AutonomousCommandFactory autoFactory = new AutonomousComman
         //         () -> -joystickFilter.filter(driver.getRightX())));
         drivetrain.setDefaultCommand(new SwerveDrive(drivetrain, () -> MathUtil.applyDeadband(driver.getLeftX(), XboxControllerConstants.DEADBAND),
                 () -> MathUtil.applyDeadband(driver.getLeftY(), XboxControllerConstants.DEADBAND), () -> MathUtil.applyDeadband(-driver.getRightX(), XboxControllerConstants.DEADBAND),
-                () -> driver.getRightTriggerAxis() > 0.25));
+                () -> driver.getRightTriggerAxis() > 0.25, () -> driver.getLeftTriggerAxis() > 0.25));
 
         // elevator.setDefaultCommand(
         // new ManualLift(() -> driver.getRightTriggerAxis() - driver.getLeftTriggerAxis(),

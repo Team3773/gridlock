@@ -82,8 +82,8 @@ public final class Constants {
   
 
         // DAMPNERS
-        public static final double kArmRotateDampner = .5;
-        public static final double kArmExtendDampner = .5;
+        public static final double kArmRotateDampner = .6;
+        public static final double kArmExtendDampner = .8;
         public static final double kSwerveDeadband = 0.1;
         public static final double setpointDeadband = 5;
   

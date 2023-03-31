@@ -4,12 +4,14 @@ import frc.robot.Constants.OperationConstants;
 import frc.robot.subsystems.ArmRotateSubsystem;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj.Timer;
 
 public class ArmRotatePIDCommand extends CommandBase{
     private final ArmRotateSubsystem armRotateSub;
     private final PIDController pidController;
     private double setpoint;
     private int armRotateCounter = 0;
+    // private Timer timer = new Timer();
 
     public ArmRotatePIDCommand(ArmRotateSubsystem subsystem, double setpoint)
     {
@@ -23,6 +25,7 @@ public class ArmRotatePIDCommand extends CommandBase{
     @Override
     public void initialize() {
         pidController.reset();
+        // timer.restart();
     }
 
     // Called every time the scheduler runs while the command is scheduled.
@@ -30,6 +33,7 @@ public class ArmRotatePIDCommand extends CommandBase{
     public void execute() {
         double speed = pidController.calculate(armRotateSub.getEncoderMeters());
         armRotateSub.setArmRotateSpeed(speed);
+        // armRotateSub.setArmRotateSpeed(.25);
     }
 
     // Called once the command ends or is interrupted.
@@ -51,5 +55,10 @@ public class ArmRotatePIDCommand extends CommandBase{
             return true;
           }
           return false;
+        // if(timer.get() > 3)
+        // {
+        //     return true;
+        // }
+        // return false;
     }
 }

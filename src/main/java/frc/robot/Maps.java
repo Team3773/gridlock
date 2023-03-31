@@ -6,11 +6,13 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import frc.robot.Constants.AutonomousConstants;
+import frc.robot.commands.ArmExtendPIDCommand;
 import frc.robot.commands.ArmRotateCommand;
 import frc.robot.commands.ArmRotatePIDCommand;
 import frc.robot.commands.AutoBalance;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.ServoTurn;
+import frc.robot.subsystems.ArmExtendSubsystem;
 import frc.robot.subsystems.ArmRotateSubsystem;
 
 /**
@@ -25,10 +27,10 @@ public class Maps {
      * @param drivetrain
      * @return
      */
-    public static HashMap<String, Command> getPathMap(Drivetrain drivetrain, ArmRotateSubsystem armRotateSub) {
+    public static HashMap<String, Command> getPathMap(Drivetrain drivetrain, ArmExtendSubsystem armExtendSubsystem) {
 
         HashMap<String, Command> eventMap = new HashMap<>();
-        eventMap.put("Fling", new ArmRotatePIDCommand(armRotateSub, 30));
+        eventMap.put("Fling", new ArmExtendPIDCommand(armExtendSubsystem, 9));
         // eventMap.put("Fling", new RunCommand(() -> armRotateSub.setArmRotateSpeed(0.3).until(armRotateSub.stopArm())));
 
         // new ArmRotatePIDCommand(armRotateSub, 30));
