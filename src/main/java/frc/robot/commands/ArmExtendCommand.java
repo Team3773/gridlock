@@ -3,15 +3,18 @@ package frc.robot.commands;
 import frc.robot.subsystems.ArmExtendSubsystem;
 import java.util.function.Supplier;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.subsystems.ArmRotateSubsystem;
 
 public class ArmExtendCommand extends CommandBase{
     private final ArmExtendSubsystem armExtendSub;
+    private final ArmRotateSubsystem armRotateSub;
     private final Supplier<Double> extendSpeedFunction;
 
-    public ArmExtendCommand(ArmExtendSubsystem subsystem, Supplier<Double> extendSpeedFunction)
+    public ArmExtendCommand(ArmExtendSubsystem subsystem, ArmRotateSubsystem armRotateSub, Supplier<Double> extendSpeedFunction)
     {
         armExtendSub = subsystem;
         this.extendSpeedFunction = extendSpeedFunction; 
+        this.armRotateSub = armRotateSub;
         
         addRequirements(armExtendSub);
     }
@@ -26,13 +29,30 @@ public class ArmExtendCommand extends CommandBase{
     public void execute() {
         double extendSpeed = extendSpeedFunction.get();
 
-        // DEADBAND
-        if(Math.abs(extendSpeed) < 0.12)
+        if(armExtendSub.isExtendAtZero() && armRotateSub.isRotateAtZero())
         {
-            extendSpeed = 0;
+            if(extendSpeed < 0)
+            {
+                armExtendSub.stopMotor();
+                armRotateSub.stopMotor();
+            }
+            else
+            {
+                armExtendSub.setArmExtendSpeed(extendSpeed);
+            }
+        }
+        else
+        {   
+            armExtendSub.setArmExtendSpeed(extendSpeed);
         }
 
-        armExtendSub.setArmExtendSpeed(extendSpeed);
+        // DEADBAND
+        // if(Math.abs(extendSpeed) < 0.12)
+        // {
+        //     extendSpeed = 0;
+        // }
+
+        // armExtendSub.setArmExtendSpeed(extendSpeed);
     }
 
     // Runs when command ends

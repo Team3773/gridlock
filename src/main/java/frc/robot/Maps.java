@@ -29,6 +29,9 @@ public class Maps {
 
         HashMap<String, Command> eventMap = new HashMap<>();
         eventMap.put("Fling", new ArmRotatePIDCommand(armRotateSub, 30));
+        // eventMap.put("Fling", new RunCommand(() -> armRotateSub.setArmRotateSpeed(0.3).until(armRotateSub.stopArm())));
+
+        // new ArmRotatePIDCommand(armRotateSub, 30));
         // eventMap.put("Fling", new InstantCommand(() -> armRotateSub.setArmRotateSpeed(.5)));
         // eventMap.put("Ground-Collect-Cone", new RunCommand(() -> lift.setGoalState(LiftState.groundCone), lift).until(lift::goalReached));
         // eventMap.put("Ground-Collect-Cube", new RunCommand(() -> lift.setGoalState(LiftState.groundCube), lift).until(lift::goalReached));

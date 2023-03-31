@@ -62,9 +62,9 @@ public class SwerveDrive extends CommandBase {
             leftY = m_translationYSupplier.getAsDouble() * DrivetrainConstants.SLOW_MODE_TRANSLATIONAL_MULT;
             rightX = m_rotationSupplier.getAsDouble() * DrivetrainConstants.SLOW_MODE_ROTATIONAL_MULT;
         } else {
-            leftX = m_translationXSupplier.getAsDouble();
-            leftY = m_translationYSupplier.getAsDouble();
-            rightX = m_rotationSupplier.getAsDouble();
+            leftX = m_translationXSupplier.getAsDouble() * 0.6;
+            leftY = m_translationYSupplier.getAsDouble() * 0.6;
+            rightX = m_rotationSupplier.getAsDouble() * 0.6;
         }
 
         Rotation2d theta = Rotation2d.fromRadians(Math.atan2(leftY, leftX));

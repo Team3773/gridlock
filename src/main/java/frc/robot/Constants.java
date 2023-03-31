@@ -80,9 +80,10 @@ public final class Constants {
         public static final double kElevatorSetpoint = 0;
         public static final double kClawSetpoint = 0;
   
+
         // DAMPNERS
-        public static final double kArmRotateDampner = .8;
-        public static final double kArmExtendDampner = .8;
+        public static final double kArmRotateDampner = .5;
+        public static final double kArmExtendDampner = .5;
         public static final double kSwerveDeadband = 0.1;
         public static final double setpointDeadband = 5;
   
@@ -102,10 +103,10 @@ public final class Constants {
         public static final double kBottomArmExtendPoint = 0;
   
         // EXTERNAL ENCODER PORTS
-        public static final int karmExtendEncoderA = 0;
-        public static final int karmExtendEncoderB = 1;
-        public static final int karmRotateEncoderA = 2;
-        public static final int karmRotateEncoderB = 3;
+        public static final int karmExtendEncoderA = 2;
+        public static final int karmExtendEncoderB = 3;
+        public static final int karmRotateEncoderA = 0;
+        public static final int karmRotateEncoderB = 1;
   
         public static final int limitSwitchPort = 4;
       }

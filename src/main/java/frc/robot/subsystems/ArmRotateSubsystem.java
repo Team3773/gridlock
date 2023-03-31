@@ -4,7 +4,9 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import frc.robot.Constants.OperationConstants;
+import frc.thunder.shuffleboard.LightningShuffleboard;
 import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -14,7 +16,7 @@ public class ArmRotateSubsystem extends SubsystemBase{
     {
       // RESET IN START POSITION
       armRotateEncoder.reset();
-      armRotateMotor.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 10, 15, 0.5));
+      armRotateMotor.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 5, 10, 0.5));
     }
       TalonSRX armRotateMotor = new TalonSRX(OperationConstants.armRotateMotorChannel);
       Encoder armRotateEncoder = new Encoder(OperationConstants.karmRotateEncoderA, OperationConstants.karmRotateEncoderB);
@@ -25,16 +27,37 @@ public class ArmRotateSubsystem extends SubsystemBase{
 
         // SmartDashboard.putNumber("Arm Rotate Encoder", getEncoderMeters());
         SmartDashboard.putNumber("Arm Rotate Encoder", armRotateEncoder.getDistance());
+        // Shuffleboard.
         // This method will be called once per scheduler run
+        LightningShuffleboard.setDouble("Arm Rotate Encoder", "Arm Rotate Encoder", armRotateEncoder.getDistance());
+
       }
     
       @Override
       public void simulationPeriodic() {
         // This method will be called once per scheduler run during simulation
       }
+
       public void setArmRotateSpeed(double speed)
       {
         armRotateMotor.set(ControlMode.PercentOutput, speed * OperationConstants.kArmRotateDampner);
+      }
+
+    public boolean isRotateAtZero()
+    {
+      if(armRotateEncoder.getDistance() <= 0)
+      {
+          return true;
+      }
+      else
+      {
+          return false;
+      }
+    }
+
+      public boolean stopArm()
+      {
+        return false;
       }
 
       public void stopMotor()
@@ -50,23 +73,3 @@ public class ArmRotateSubsystem extends SubsystemBase{
         // return armRotateEncoder.get() * OperationConstants.kArmRotateEncoderRot2Meter;
       }
 }
-
-        // CODE TO PREVENT MAXING OR MINING
-        // if(this.getEncoderMeters() >= OperationConstants.kTopArmRotatePoint)
-        // {
-        //   if (speed < 0)
-        //   {
-        //     armRotateMotor.set(ControlMode.PercentOutput, speed * OperationConstants.kArmRotateDampner);
-        //   }
-        // }
-        // else if(this.getEncoderMeters() <= OperationConstants.kBottomArmRotatePoint)
-        // {
-        //   if (speed > 0)
-        //   {
-        //     armRotateMotor.set(ControlMode.PercentOutput, speed * OperationConstants.kArmRotateDampner);
-        //   }
-        // }
-        // else
-        // {
-        //   armRotateMotor.set(ControlMode.PercentOutput, speed * OperationConstants.kArmRotateDampner);
-        // }

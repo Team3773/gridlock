@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import frc.robot.Constants.OperationConstants;
+import frc.thunder.shuffleboard.LightningShuffleboard;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -34,16 +35,28 @@ public class ArmExtendSubsystem extends SubsystemBase{
         SmartDashboard.putNumber("Arm Extend Encoder: ", getEncoderMeters());
         // SmartDashboard.putNumber("Arm Extend Encoder: ", getEncoderMeters());
         // This method will be called once per scheduler run
+        LightningShuffleboard.setDouble("Arm Extend Encoder", "Arm Extend Encoder", armExtendEncoder.getPosition());
       }
     
       @Override
       public void simulationPeriodic() {
-        // This method will be called once per scheduler run during simulation
+        // This method will be called once per scheduler run during simulationjnmjjjnjjnnnmjnmjnmm
       }
       public void setArmExtendSpeed(double speed)
       {
-        // armExtendMotor.set(ControlMode.PercentOutput, speed * OperationConstants.kArmRotateDampner);
         armExtendMotor.set(speed * OperationConstants.kArmExtendDampner);
+      }
+
+      public boolean isExtendAtZero()
+      {
+        if(armExtendEncoder.getPosition() <= 0)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
       }
 
       public void stopMotor()
@@ -60,23 +73,3 @@ public class ArmExtendSubsystem extends SubsystemBase{
         return armExtendEncoder.getPosition();
       }
 }
-
-        // CODE TO STOP ARM EXTEND FROM MAXING OR MINING
-        // if(armExtendEncoder.getPosition() >= OperationConstants.kElevatorTopPosition)
-        // {
-        //   if (speed < 0)
-        //   {
-        //     armExtendMotor.set(speed);
-        //   }
-        // }
-        // else if(armExtendEncoder.getPosition() <= OperationConstants.kElevatorBottomPosition)
-        // {
-        //   if (speed > 0)
-        //   {
-        //     armExtendMotor.set(speed);
-        //   }
-        // }
-        // else
-        // {
-        //   armExtendMotor.set(speed);
-        // }

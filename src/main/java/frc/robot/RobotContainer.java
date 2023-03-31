@@ -57,7 +57,7 @@ public class RobotContainer extends LightningContainer {
     private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
     private final ClawSubsystem clawSubsystem = new ClawSubsystem();
     private final ArmExtendSubsystem armExtendSubsystem = new ArmExtendSubsystem();
-    private final ArmRotateSubsystem armRotateSubsystem = new ArmRotateSubsystem();
+    private static final ArmRotateSubsystem armRotateSubsystem = new ArmRotateSubsystem();
     
     // Creating our main subsystems
     private static final Drivetrain drivetrain = new Drivetrain();
@@ -83,18 +83,19 @@ private static final AutonomousCommandFactory autoFactory = new AutonomousComman
     
     public RobotContainer()
     {
+        super();
         // OPEN AND CLOSE CLAW
-        clawSubsystem.setDefaultCommand(new ClawCommand(clawSubsystem, () -> operatorJoystick.getRightTriggerAxis(), () -> operatorJoystick.getLeftTriggerAxis()));
+        clawSubsystem.setDefaultCommand(new ClawCommand(clawSubsystem, () -> MathUtil.applyDeadband(operatorJoystick.getRightTriggerAxis(), .02), () -> MathUtil.applyDeadband(operatorJoystick.getLeftTriggerAxis(), .02)));
 
         // EXTEND ARM
-        armExtendSubsystem.setDefaultCommand(new ArmExtendCommand(armExtendSubsystem, () -> operatorJoystick.getLeftY()));
+        armExtendSubsystem.setDefaultCommand(new ArmExtendCommand(armExtendSubsystem, armRotateSubsystem, () -> MathUtil.applyDeadband(operatorJoystick.getLeftY(), .12)));
         
         // ROTATE ARM
-        armRotateSubsystem.setDefaultCommand(new ArmRotateCommand(armRotateSubsystem, () -> operatorJoystick.getRightY()));
+        armRotateSubsystem.setDefaultCommand(new ArmRotateCommand(armRotateSubsystem, armExtendSubsystem, () -> MathUtil.applyDeadband(operatorJoystick.getRightY(), .12)));
 
         // ELEVATOR MANUAL
-        new Trigger(operatorJoystick::getAButton).whileTrue(new StartEndCommand(() -> elevatorSubsystem.setElevatorSpeed(.15), () -> elevatorSubsystem.stopMotor(), elevatorSubsystem));
-        new Trigger(operatorJoystick::getYButton).whileTrue(new StartEndCommand(() -> elevatorSubsystem.setElevatorSpeed(-.15), () -> elevatorSubsystem.stopMotor(), elevatorSubsystem));
+        new Trigger(operatorJoystick::getYButton).whileTrue(new StartEndCommand(() -> elevatorSubsystem.setElevatorSpeed(.15), () -> elevatorSubsystem.stopMotor(), elevatorSubsystem));
+        new Trigger(operatorJoystick::getAButton).whileTrue(new StartEndCommand(() -> elevatorSubsystem.setElevatorSpeed(-.15), () -> elevatorSubsystem.stopMotor(), elevatorSubsystem));
 
         // PRESETS
 
@@ -118,6 +119,7 @@ private static final AutonomousCommandFactory autoFactory = new AutonomousComman
             new InstantCommand(() -> clawSubsystem.zeroEncoder()),
             new InstantCommand(() -> armRotateSubsystem.zeroEncoder())
             ));
+        
     }
     
     @Override
